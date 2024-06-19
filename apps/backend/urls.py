@@ -1,6 +1,6 @@
 # urls.py
 from django.urls import path
-from .dashbaord import(
+from .dashboard import(
     DashboardDataViewSet
 )
 
