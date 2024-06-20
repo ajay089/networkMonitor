@@ -6,7 +6,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Era's Network {% if title %}| {{ title }}{% endif %} </title>
+    <title>Era's Network {% block title %} {% endblock %} </title>
     <link rel="icon" href="{% static 'dist/img/favicon.png' %}" type="image/png">
     <!-- CSS files -->
     <link href="{% static 'dist/css/tabler.min.css' %}" rel="stylesheet"/>
@@ -79,7 +79,9 @@
       </div>
     <div class="page">
       <!-- Navbar -->
-      {% include 'partial/navigation.html' %}
+      <div class="sticky-top">
+          {% include 'partial/navigation.html' %}
+        </div>  
       <div class="page-wrapper">
         {% block content %} {% endblock %}
         {% include 'partial/footer.html' %}
@@ -188,7 +190,8 @@
       </div>
     </div>
     {% block script %} 
-    
+    <script src="{% static 'dist/js/tabler.min.js' %}" defer></script>
+    <script src="{% static 'dist/js/demo.min.js' %}" defer></script>
     {% endblock %} 
   </body>
 </html>

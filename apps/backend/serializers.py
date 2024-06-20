@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from apps.frontend.models import SystemConfiguration
 
 class DashboardDataSerializer(serializers.Serializer):
     totalCountToday = serializers.IntegerField()
@@ -17,3 +18,22 @@ class DashboardDataSerializer(serializers.Serializer):
     pctChangeTotalOutgoing = serializers.FloatField(allow_null=True)
     pctChangeTotalIncoming = serializers.FloatField(allow_null=True)
     pctChangeLoginAttempts = serializers.FloatField(allow_null=True)
+
+class SystemConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SystemConfiguration
+        fields = ['id', 'system_name', 'system_type', 'system_ip']
+
+class PaginatedSystemConfigurationSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    next = serializers.CharField(allow_null=True)
+    previous = serializers.CharField(allow_null=True)
+    results = SystemConfigurationSerializer(many=True)
+    current_page = serializers.SerializerMethodField()
+    page_size = serializers.IntegerField()
+    system_name = serializers.CharField(allow_blank=True)
+
+    def get_current_page(self, obj):
+        if 'request' in self.context:
+            return int(self.context['request'].query_params.get('page', 1))
+        return 1

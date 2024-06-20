@@ -1,5 +1,5 @@
 {% extends 'partial/layout.html' %}
-
+{% block title %} | Dashboard{% endblock %}
 {% block content %}
 {% load static %}
 {% block style %}
@@ -233,7 +233,7 @@
      $('#bandwidth-chart').html(placeholder_bandwidth);
 
       var api_url = '{{api_url}}';
-      var token = '{{token}}';  // Replace with the user's authentication token
+      var token = '{{token}}';  
 
       $.ajax({
           url: api_url,
@@ -302,11 +302,11 @@
           html += '</div>';
       getData();
       // Set interval to call every 5 seconds
-        setInterval(function() {
-          openToaster("success", html);
-          // Call your function here
-          getData(); 
-        }, 50000); 
+        // setInterval(function() {
+        //   openToaster("success", html);
+        //   // Call your function here
+        //   getData(); 
+        // }, 50000); 
     });
     
   </script>

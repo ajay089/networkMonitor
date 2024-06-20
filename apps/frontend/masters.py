@@ -4,13 +4,15 @@ from django.conf import settings
 
 
 @login_required
-def index(request):
-    api_url = f"{settings.API_BASE_URL}/api/dashboard/"
+def system_configuration(request):
+    api_url = f"{settings.API_BASE_URL}/api/systemconfig/"
     token   = f'Token {request.user.auth_token}'
    
     context = {
-        'api_url': api_url,
+        'page_title' : 'System Configuration',
+        'api_url':api_url,
         'token':token
     }
-    template     = 'dashboard/index.html'
+    
+    template     = 'master/system_configuration/index.html'
     return render(request, template, context)
