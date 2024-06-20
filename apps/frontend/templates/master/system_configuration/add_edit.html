@@ -1,0 +1,98 @@
+{% load static %}
+<form id="add_edit_form" method="post">
+{% csrf_token %}
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{page_title}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="mb-3">
+              <label class="form-label">System Name *</label>
+              <input type="text" id="system_name" class="form-control">
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3">
+              <label class="form-label">System Type *</label>
+              <select class="form-select" id="system_type"> 
+                <option value="">Select</option>
+                <option value="normal">Normal</option>
+                <option value="server">Server</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div>
+              <label class="form-label">System IP *</label>
+              <input type="text" id="system_ip" class="form-control">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        
+        <a href="javascript:saveUpdate()" class="btn btn-primary ms-auto">
+             Save
+        </a>
+      </div>
+    </div>
+  </div>
+</form>
+  <script>
+    document.getElementById("add_edit_form").addEventListener("submit", function(event) {
+      event.preventDefault(); // Prevent default form submission
+  
+      saveUpdate(); // Call your custom function to handle form submission
+    });
+    function saveUpdate(){
+        var system_name = $('#system_name').val();
+        var system_type = $('#system_type').val();
+        var system_ip   = $('#system_ip').val();
+
+        var api_url = '{{api_url}}';
+        var token = '{{token}}';  
+        $.ajax({
+            url: api_url,
+            method: 'POST',
+            headers: {
+                'Authorization': token
+            },
+            data: { 
+                system_name: system_name, 
+                system_type: system_type, 
+                system_ip: system_ip 
+            },
+            success: function (data) {
+                if (data && data.message) {
+                    openToaster("success", data.message);
+                    $("#modal-report").html('');
+                    $('.modal').modal('hide');
+                    fetchData(1);
+                } else {
+                    openToaster("danger", "Unknown success response format.");
+                }
+            },
+            error: function (err) {
+                var errorMessage = "An error occurred while processing your request.";
+                if (err.responseJSON) {
+                    errorMessage = '';
+                    for (var key in err.responseJSON) {
+                        if (err.responseJSON.hasOwnProperty(key)) {
+                            errorMessage += key + ": " + err.responseJSON[key] + "<br>";
+                        }
+                    }
+                }
+                openToaster("danger", errorMessage);
+                $('.modal').modal('show');
+            }
+        }).always(function() {
+            // hideLoader();
+        }); 
+    }
+
+  </script>

@@ -9,5 +9,5 @@ urlpatterns = [
     path('logout/', auth.logout_view, name='logout'),
 
     path('dashboard', dashboard.index, name='dashboard'),
-    path('system/config', masters.system_configuration, name='system_configuration'),
+    path('system/config', masters.SystemConfigurationView.as_view(), name='system_configuration'),
 ]

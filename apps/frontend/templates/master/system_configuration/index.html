@@ -17,8 +17,8 @@
                         <h3 class="card-title">{{ page_title }}</h3>
                         <div class="col-auto ms-auto d-print-none">
                             <div class="btn-list">
-                                <a  class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal"
-                                    data-bs-target="#modal-report">
+                                <a href="javascript:void(0)"  class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal"
+                                    data-bs-target="#modal-report" onclick="addEdit()">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
                                         viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                                         stroke-linecap="round" stroke-linejoin="round">
@@ -67,6 +67,7 @@
                                     <th>System Name</th>
                                     <th>System Type</th>
                                     <th>System IP</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -86,10 +87,10 @@
 {% endblock content %}
 
 {% block script %}
-<script src="{% static 'dist/js/tabler.min.js' %}" defer></script>
-<script src="{% static 'dist/js/demo.min.js' %}" defer></script>
 
 <script>
+  
+    
     function fetchData(page) {
         var pageSize = $('#page-size-input').val();
         var systemName = $('#system-name-input').val();
@@ -129,6 +130,9 @@
                     '<td>' + item.system_name + '</td>' +
                     '<td>' + item.system_type + '</td>' +
                     '<td>' + item.system_ip + '</td>' +
+                    '<td><a href="javascript:void(0)" title="Edit" data-bs-placement="top" data-bs-toggle="modal" data-bs-target="#modal-report" onclick="addEdit(' + item.id + ')" >' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>' +
+                    '</a></td>' +
                     '</tr>';
                 tbody.append(row);
             });
@@ -193,5 +197,22 @@
         // Fetch initial data
         fetchData(1);
     });
+
+    function addEdit(id = '') {
+        console.log(id);
+        $('#modal-report').html('');
+        $.ajax({
+            url: "{% url 'system_configuration' %}",
+            method: 'GET',
+            data: { id:id, type: 'add' },
+            success: function (data) {
+                $("#modal-report").show();
+                $('#modal-report').html(data);
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        });
+    };
 </script>
 {% endblock %}
