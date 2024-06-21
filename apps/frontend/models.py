@@ -61,12 +61,15 @@ class SystemConfiguration(models.Model):
         ('server', 'Server'),
     ]
     
-    system_name = models.CharField(max_length=100)
+    system_name = models.CharField(max_length=222)
     system_type = models.CharField(max_length=6, choices=SYSTEM_TYPE_CHOICES)
     system_ip = models.GenericIPAddressField(protocol='both', unpack_ipv4=False)
 
     class Meta:
         db_table = 'system_configuration'
+        constraints = [
+            models.UniqueConstraint(fields=['system_name', 'system_ip'], name='unique_system_name_system_ip')
+        ]
 
     def __str__(self):
         return f'{self.system_name} ({self.system_type}) - {self.system_ip}'

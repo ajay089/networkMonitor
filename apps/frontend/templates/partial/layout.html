@@ -14,6 +14,7 @@
     <link href="{% static 'dist/css/tabler-payments.min.css' %}" rel="stylesheet"/>
     <link href="{% static 'dist/css/tabler-vendors.min.css' %}" rel="stylesheet"/>
     <link href="{% static 'dist/css/demo.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'dist/css/jquery-confirm.min.css' %}" rel="stylesheet"/>
     <link rel="stylesheet" href="{% static 'dist/css/inter.css' %}">
     
     <style>
@@ -33,11 +34,19 @@
         text-align: center!important;
         z-index: 9999;
       }
+      .card-header{
+        padding: 10px!important;
+      }
+      .card-title{ font-weight: bold;}
+      .page-header{
+        min-height: 0!important;
+      }
     </style>
     {% block style %} {% endblock %}
     <script src="{% static 'dist/js/jquery.min.js' %}"></script>
     <script src="{% static 'dist/js/tabler.min.js' %}" defer></script> 
     <script src="{% static 'dist/js/demo.min.js' %}" defer></script>
+    <script src="{% static 'dist/js/jquery-confirm.min.js' %}" defer></script>
     {% if messages %}
     {% for message in messages %}
     <script>
@@ -62,8 +71,11 @@
       } else if (toastType == "danger" || toastType == 'success alert-danger') {
         $("#toastBar").addClass("alert-danger");
       }
-      $("#toastBar").show().delay(4000).fadeOut();
+      $("#toastBar").show().delay(2000).fadeOut();
     };
+    function closeToaster(){
+      $("#toastBar").hide();
+    }
     </script>
   </head>
   <body  class=" layout-fluid">
@@ -78,7 +90,7 @@
           
           </div>
         </div>
-        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+        <a href="javascript:void(0)" onclick="closeToaster()" class="btn-close" aria-label="close"></a>
       </div>
     <div class="page">
       <!-- Navbar -->

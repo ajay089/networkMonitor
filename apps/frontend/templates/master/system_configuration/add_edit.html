@@ -13,7 +13,7 @@
           <div class="col-lg-6">
             <div class="mb-3">
               <label class="form-label">System Name *</label>
-              <input type="text" id="system_name" class="form-control">
+              <input type="text" id="system_name" class="form-control" value="{% if result %}{{result.system_name}}{% endif %}" maxlength="222">
             </div>
           </div>
           <div class="col-lg-6">
@@ -21,15 +21,15 @@
               <label class="form-label">System Type *</label>
               <select class="form-select" id="system_type"> 
                 <option value="">Select</option>
-                <option value="normal">Normal</option>
-                <option value="server">Server</option>
+                <option value="normal" {% if result and result.system_type == 'normal' %}selected{% endif %}>Normal</option>
+                <option value="server" {% if result and result.system_type == 'server' %}selected{% endif %}>Server</option>
               </select>
             </div>
           </div>
           <div class="col-lg-12">
             <div>
               <label class="form-label">System IP *</label>
-              <input type="text" id="system_ip" class="form-control">
+              <input type="text" id="system_ip" class="form-control" value="{% if result %}{{result.system_ip}}{% endif %}">
             </div>
           </div>
         </div>
@@ -54,11 +54,16 @@
         var system_type = $('#system_type').val();
         var system_ip   = $('#system_ip').val();
 
-        var api_url = '{{api_url}}';
+        var api_url = '{{ api_url }}';
+        {% if result %}
+          var method = 'PUT';
+        {% else %}
+          var method = 'POST';
+        {% endif %}
         var token = '{{token}}';  
         $.ajax({
             url: api_url,
-            method: 'POST',
+            method: method,
             headers: {
                 'Authorization': token
             },

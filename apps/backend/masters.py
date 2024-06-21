@@ -94,6 +94,22 @@ class SystemConfigurationAPIView(ViewSet):
         except Exception as e:
             raise APIException({"error": str(e)})
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description="SystemConfiguration ID", type=openapi.TYPE_INTEGER)
+        ],
+        responses={204: 'No Content', 404: 'Not Found'}
+    )
+    def destroy(self, request, id=None, *args, **kwargs):
+        try:
+            instance = SystemConfiguration.objects.get(id=id)
+            instance.delete()
+            return Response({"message": "Record has been removed successfully"}, status=202)
+        except ObjectDoesNotExist:
+            return Response({"error": f"SystemConfiguration id #{id} not found"}, status=404)
+        except Exception as e:
+            raise APIException({"error": str(e)})
+        
     ''' List System Configurations with Pagination '''
     @swagger_auto_schema(
         manual_parameters=[

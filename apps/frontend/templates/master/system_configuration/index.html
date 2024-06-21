@@ -90,7 +90,6 @@
 
 <script>
   
-    
     function fetchData(page) {
         var pageSize = $('#page-size-input').val();
         var systemName = $('#system-name-input').val();
@@ -132,12 +131,17 @@
                     '<td>' + item.system_ip + '</td>' +
                     '<td><a href="javascript:void(0)" title="Edit" data-bs-placement="top" data-bs-toggle="modal" data-bs-target="#modal-report" onclick="addEdit(' + item.id + ')" >' +
                     '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>' +
-                    '</a></td>' +
+                    '</a>' +
+                    '|' +
+                    '<a href="javascript:void(0)" onclick="deleteRecord(' + item.id + ')" title="Delete" data-bs-placement="top">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>' +
+                    '</a>' +
+                    '</td>' +
                     '</tr>';
                 tbody.append(row);
             });
         } else {
-            tbody.html('<tr><td colspan="4">No data available</td></tr>');
+            tbody.html('<tr><td colspan="5">No data available</td></tr>');
         }
     }
 
@@ -210,9 +214,71 @@
                 $('#modal-report').html(data);
             },
             error: function (err) {
-                console.log(err)
+                var errorMessage = "An error occurred while processing your request.";
+                if (err.responseJSON) {
+                    errorMessage = '';
+                    for (var key in err.responseJSON) {
+                        if (err.responseJSON.hasOwnProperty(key)) {
+                            errorMessage += key + ": " + err.responseJSON[key] + "<br>";
+                        }
+                    }
+                }
+                openToaster("danger", errorMessage);
             }
         });
+    };
+
+    function deleteRecord(id) {
+        $.confirm({
+            title: 'Confirm!',
+            theme: 'material',
+            content: 'Do you want to Delete ?',
+            buttons: {
+                confirm: {
+                    btnClass: 'btn-blue',
+                    action: function () {
+                        // start ajax
+                        var api_url = '{{api_url}}'+id+'/';
+                        var token = '{{token}}';  
+                        $.ajax({
+                            url: api_url,
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': token
+                            },
+                            data: { },
+                            success: function (data) {
+                                console.log(data);
+                                openToaster("success", data.message);
+                                fetchData(1);
+                            },
+                            error: function (err) {
+                                var errorMessage = "An error occurred while processing your request.";
+                                if (err.responseJSON) {
+                                    errorMessage = '';
+                                    for (var key in err.responseJSON) {
+                                        if (err.responseJSON.hasOwnProperty(key)) {
+                                            errorMessage += key + ": " + err.responseJSON[key] + "<br>";
+                                        }
+                                    }
+                                }
+                                openToaster("danger", errorMessage);
+                            }
+                        });
+                        //end ajax
+                    }
+                },
+                cancel: {
+                    btnClass: 'btn-red',
+                    action: function () {
+
+                    }
+                },
+
+
+            }
+        });
+
     };
 </script>
 {% endblock %}
