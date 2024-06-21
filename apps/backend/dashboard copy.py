@@ -87,22 +87,8 @@ class DashboardDataViewSet(viewsets.ViewSet):
             level_rows = cursor.fetchall()
         return level_rows
 
-    # Define query for type and sub type data
-    def fetch_type_subtype_data(self, start_date, end_date):
-        type_subtype_query = """
-            SELECT type, subtype, COUNT(id) as event_count
-            FROM logs
-            WHERE date BETWEEN %s AND %s
-            GROUP BY type, subtype
-            ORDER BY event_count DESC;
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(type_subtype_query, [start_date, end_date])
-            type_subtype_rows = cursor.fetchall()
-        return type_subtype_rows
-
     # Format data for response
-    def format_data(self, main_row, bandwidth_rows, level_rows, type_subtype_rows, start_date, end_date):
+    def format_data(self, main_row, bandwidth_rows, level_rows, start_date, end_date):
         if not main_row:
             return Response({'error': 'No data found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -167,21 +153,6 @@ class DashboardDataViewSet(viewsets.ViewSet):
         # Add level_data to main_data in descending date order
         main_data['level_data'] = level_data_formatted
 
-        # Process type_subtype data
-        type_subtype_data = {}
-        for row in type_subtype_rows:
-            type_ = row[0].capitalize()
-            subtype = row[1].capitalize()
-            event_count = row[2]
-
-            if type_ not in type_subtype_data:
-                type_subtype_data[type_] = {}
-
-            type_subtype_data[type_][subtype] = event_count
-
-        # Add type_subtype_data to main_data
-        main_data['type_subtype_data'] = type_subtype_data
-
         return main_data
 
     # Implement list view
@@ -195,16 +166,14 @@ class DashboardDataViewSet(viewsets.ViewSet):
                 future_dashboard_data = executor.submit(self.fetch_dashboard_data)
                 future_bandwidth_data = executor.submit(self.fetch_bandwidth_data, start_date, end_date)
                 future_level_data = executor.submit(self.fetch_level_data, start_date, end_date)
-                future_type_subtype_data = executor.submit(self.fetch_type_subtype_data, start_date, end_date)
 
                 # Retrieve results
                 main_row = future_dashboard_data.result()
                 bandwidth_rows = future_bandwidth_data.result()
                 level_rows = future_level_data.result()
-                type_subtype_rows = future_type_subtype_data.result()
 
             # Format data
-            formatted_data = self.format_data(main_row, bandwidth_rows, level_rows, type_subtype_rows, start_date, end_date)
+            formatted_data = self.format_data(main_row, bandwidth_rows, level_rows, start_date, end_date)
 
             # Return formatted data as JSON response
             return JsonResponse(formatted_data)

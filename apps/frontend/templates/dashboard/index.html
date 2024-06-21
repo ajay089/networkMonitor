@@ -153,17 +153,45 @@
         <div class="col-lg-6">
           <div class="card">
             <div class="card-body">
-              <h3 class="card-title">Traffic summary</h3>
-              <div id="chart-mentions" class="chart-lg"></div>
+              <h3 class="card-title">Firewall Security Event Severity Levels</h3>
+              <div id="chart-mentions" class="chart-lg">
+                <div class="card-body text-end placeholder-glow">
+                  <div class="placeholder col-9 mb-3"></div>
+                  <div class="placeholder placeholder-xs col-10"></div>
+                  <div class="placeholder placeholder-xs col-12"></div>
+                  <div class="placeholder placeholder-xs col-11"></div>
+                  <div class="placeholder placeholder-xs col-8"></div>
+                  <div class="placeholder placeholder-xs col-10"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- <div class="col-lg-4">
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title">Firewall Type Subtype Data</h3>
+              <div id="type-subtype-chart" class="chart-lg">
+                <div class="card-body text-end placeholder-glow">
+                  <div class="placeholder col-9 mb-3"></div>
+                  <div class="placeholder placeholder-xs col-10"></div>
+                  <div class="placeholder placeholder-xs col-12"></div>
+                  <div class="placeholder placeholder-xs col-11"></div>
+                  <div class="placeholder placeholder-xs col-8"></div>
+                  <div class="placeholder placeholder-xs col-10"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> -->
+        
        
         
         <div class="col-lg-6">
           <div class="card">
             <div class="card-header border-0">
-              <div class="card-title">Bandwidth Consumptions(Last Seven Days)</div>
+              <div class="card-title">Firewall Bandwidth Consumptions</div>
             </div>
             <div class="position-relative">
               <div class="position-absolute top-0 left-0 px-3 mt-1 w-75">
@@ -229,7 +257,7 @@
 
      var placeholder_bandwidth = '<div class="card-body text-end placeholder-glow"><div class="placeholder col-9 mb-3"></div><div class="placeholder placeholder-xs col-10"></div><div class="placeholder placeholder-xs col-12"></div><div class="placeholder placeholder-xs col-11"></div><div class="placeholder placeholder-xs col-8"></div><div class="placeholder placeholder-xs col-10"></div></div>';
      $('#bandwidth-chart').html(placeholder_bandwidth);
-
+     $('#chart-mentions').html(placeholder_bandwidth);
       var api_url = '{{api_url}}';
       var token = '{{token}}';  
 
@@ -281,8 +309,19 @@
               
               //Clear Placeholder
               $('#bandwidth-chart').html('');
+              $('#chart-mentions').html('');
+              $('#type-subtype-chart').html('');
               // Call function to update ApexCharts with data
               updateApexChart(data.bandwidthData);
+              initOrUpdateChart(data.level_data);
+
+              // Example event handler for legend item click (replace with actual event handling logic)
+            $('#chart-mentions').on('click', '.apexcharts-legend-text', function() {
+                let selectedLevel = $(this).text();
+                updateChartWithLevel(levelData, selectedLevel);
+            });
+
+            
 
           },
           error: function(xhr, status, error) {
@@ -307,132 +346,122 @@
         // }, 50000); 
     });
     
-  </script>
-  
- 
-  <script>
-    // @formatter:off
-    document.addEventListener("DOMContentLoaded", function () {
-        window.ApexCharts && (new ApexCharts(document.getElementById('chart-mentions'), {
-            chart: {
-                type: "bar",
-                fontFamily: 'inherit',
-                height: 240,
-                parentHeightOffset: 0,
-                toolbar: {
-                    show: false,
+
+    let chart; // Global variable to hold the chart instance
+
+    // Function to update the chart based on selected severity level
+    function updateChartWithLevel(levelData, level) {
+        // Extracting data for the selected level
+        let dates = levelData.map(entry => entry.date);
+        let levelDataSelected = levelData.map(entry => entry.level_data[level] || 0);
+
+        // Update the series data for the chart
+        chart.updateSeries([{
+            name: level,
+            data: levelDataSelected
+        }]);
+
+        // Update x-axis categories
+        chart.updateOptions({
+            xaxis: {
+                categories: dates
+            }
+        });
+    }
+
+    // Function to initialize or update the ApexCharts instance
+    function initOrUpdateChart(levelData) {
+        // Extracting initial data for all levels
+        let dates = levelData.map(entry => entry.date);
+        let alertData = levelData.map(entry => entry.level_data.alert || 0);
+        let errorData = levelData.map(entry => entry.level_data.error || 0);
+        let informationData = levelData.map(entry => entry.level_data.information || 0);
+        let noticeData = levelData.map(entry => entry.level_data.notice || 0);
+        let warningData = levelData.map(entry => entry.level_data.warning || 0);
+
+        // Initialize ApexCharts if chart is not already initialized
+        if (!chart) {
+            chart = new ApexCharts(document.getElementById('chart-mentions'), {
+                chart: {
+                    type: "bar",
+                    fontFamily: 'inherit',
+                    height: 280,
+                    parentHeightOffset: 0,
+                    toolbar: {
+                        show: false,
+                    },
+                    animations: {
+                        enabled: false
+                    },
+                    stacked: true,
                 },
-                animations: {
-                    enabled: false
-                },
-                stacked: true,
-            },
-            plotOptions: {
-                bar: {
-                    columnWidth: '50%',
-                }
-            },
-            dataLabels: {
-                enabled: false,
-            },
-            fill: {
-                opacity: 1,
-            },
-            series: [{
-                name: "Web",
-                data: [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 2, 12, 5, 8, 22, 6, 8, 6, 4, 1, 8, 24, 29, 51, 40, 47, 23, 26, 50, 26, 41, 22, 46, 47, 81, 46, 6]
-            },{
-                name: "Social",
-                data: [2, 5, 4, 3, 3, 1, 4, 7, 5, 1, 2, 5, 3, 2, 6, 7, 7, 1, 5, 5, 2, 12, 4, 6, 18, 3, 5, 2, 13, 15, 20, 47, 18, 15, 11, 10, 0]
-            },{
-                name: "Other",
-                data: [2, 9, 1, 7, 8, 3, 6, 5, 5, 4, 6, 4, 1, 9, 3, 6, 7, 5, 2, 8, 4, 9, 1, 2, 6, 7, 5, 1, 8, 3, 2, 3, 4, 9, 7, 1, 6]
-            }],
-            tooltip: {
-                theme: 'dark'
-            },
-            grid: {
-                padding: {
-                    top: -20,
-                    right: 0,
-                    left: -4,
-                    bottom: -4
-                },
-                strokeDashArray: 4,
-                xaxis: {
-                    lines: {
-                        show: true
+                plotOptions: {
+                    bar: {
+                        columnWidth: '50%',
                     }
                 },
-            },
-            xaxis: {
-                labels: {
-                    padding: 0,
+                dataLabels: {
+                    enabled: false,
+                },
+                fill: {
+                    opacity: 1,
+                },
+                series: [
+                    { name: "Alert", data: alertData },
+                    { name: "Error", data: errorData },
+                    { name: "Information", data: informationData },
+                    { name: "Notice", data: noticeData },
+                    { name: "Warning", data: warningData }
+                ],
+                xaxis: {
+                    labels: {
+                        rotate: -45
+                    },
+                    categories: dates,
+                },
+                yaxis: {
+                    title: {
+                        text: 'Count',
+                    },
+                },
+                colors:['#FF4560', '#FF9F43', '#775DD0', '#17A2B8', '#FFC107'], // Example colors
+                legend: {
+                    show: true,
+                    position: 'top',
+                    horizontalAlign: 'right',
+                    onItemClick: {
+                        toggleDataSeries: true // Allow toggling of data series on legend click
+                    },
+                    onItemHover: {
+                        highlightDataSeries: true
+                    },
                 },
                 tooltip: {
-                    enabled: false
+                    theme: 'dark'
                 },
-                axisBorder: {
-                    show: false,
+                grid: {
+                    padding: {
+                        top: -20,
+                        right: 0,
+                        left: -4,
+                        bottom: -4
+                    },
+                    strokeDashArray: 4,
+                    xaxis: {
+                        lines: {
+                            show: true
+                        }
+                    },
                 },
-                type: 'datetime',
-            },
-            yaxis: {
-                labels: {
-                    padding: 4
-                },
-            },
-            labels: [
-                '2020-06-20', '2020-06-21', '2020-06-22', '2020-06-23', '2020-06-24', '2020-06-25', '2020-06-26', '2020-06-27', '2020-06-28', '2020-06-29', '2020-06-30', '2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08', '2020-07-09', '2020-07-10', '2020-07-11', '2020-07-12', '2020-07-13', '2020-07-14', '2020-07-15', '2020-07-16', '2020-07-17', '2020-07-18', '2020-07-19', '2020-07-20', '2020-07-21', '2020-07-22', '2020-07-23', '2020-07-24', '2020-07-25', '2020-07-26'
-            ],
-            colors: [tabler.getColor("primary"), tabler.getColor("primary", 0.8), tabler.getColor("green", 0.8)],
-            legend: {
-                show: false,
-            },
-        })).render();
-    });
-    // @formatter:on
+            });
+
+            chart.render();
+        }
+    };
+
+    
   </script>
 
-  <script>
-    // @formatter:off
-    document.addEventListener("DOMContentLoaded", function () {
-        window.ApexCharts && (new ApexCharts(document.getElementById('sparkline-activity'), {
-            chart: {
-                type: "radialBar",
-                fontFamily: 'inherit',
-                height: 40,
-                width: 40,
-                animations: {
-                    enabled: false
-                },
-                sparkline: {
-                    enabled: true
-                },
-            },
-            tooltip: {
-                enabled: false,
-            },
-            plotOptions: {
-                radialBar: {
-                    hollow: {
-                        margin: 0,
-                        size: '75%'
-                    },
-                    track: {
-                        margin: 0
-                    },
-                    dataLabels: {
-                        show: false
-                    }
-                }
-            },
-            colors: [tabler.getColor("blue")],
-            series: [35],
-        })).render();
-    });
-    // @formatter:on
-  </script>
   <script>
     function updateApexChart(bandwidthData) {
     // Extract keys (dates) and values (bandwidth data) into arrays
@@ -451,7 +480,7 @@
           chart: {
               type: "area",
               fontFamily: 'inherit',
-              height: 260,
+              height: 332,
               sparkline: {
                   enabled: true
               },
@@ -507,8 +536,9 @@
               show: false
           },
       }).render();
-}
+};
+
     
-  </script>
+</script>
 
 {% endblock %}

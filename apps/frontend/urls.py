@@ -10,4 +10,5 @@ urlpatterns = [
 
     path('dashboard', dashboard.index, name='dashboard'),
     path('system/config', masters.SystemConfigurationView.as_view(), name='system_configuration'),
+    path('system/ippool', masters.SystemIpPoolView.as_view(), name='system_ip_pool'),
 ]

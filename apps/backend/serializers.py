@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from apps.frontend.models import SystemConfiguration
+from apps.frontend.models import (
+    SystemConfiguration, SystemIPPool
+)
 
 class DashboardDataSerializer(serializers.Serializer):
     totalCountToday = serializers.IntegerField()
@@ -36,4 +38,22 @@ class PaginatedSystemConfigurationSerializer(serializers.Serializer):
     def get_current_page(self, obj):
         if 'request' in self.context:
             return int(self.context['request'].query_params.get('page', 1))
-        return 1
+        return 
+
+class SystemIpPoolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SystemIPPool
+        fields = ['id', 'from_ip_range', 'to_ip_range']
+
+class PaginatedSystemIpPoolSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    next = serializers.CharField(allow_null=True)
+    previous = serializers.CharField(allow_null=True)
+    results = SystemIpPoolSerializer(many=True)
+    current_page = serializers.SerializerMethodField()
+    page_size = serializers.IntegerField()
+
+    def get_current_page(self, obj):
+        if 'request' in self.context:
+            return int(self.context['request'].query_params.get('page', 1))
+        return 1    

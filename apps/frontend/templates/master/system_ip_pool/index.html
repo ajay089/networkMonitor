@@ -1,0 +1,291 @@
+{% extends 'partial/layout.html' %}
+{% block title %} | System Configuration{% endblock %}
+{% block content %}
+{% load static %}
+{% block style %}
+
+{% endblock %}
+
+<!-- Page body -->
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-cards">
+            
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ page_title }}</h3>
+                        <div class="col-auto ms-auto d-print-none">
+                            <div class="btn-list">
+                                <a href="javascript:void(0)"  class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal"
+                                    data-bs-target="#modal-report" onclick="addEdit()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M12 5l0 14" />
+                                        <path d="M5 12l14 0" />
+                                    </svg>
+                                    Create new
+                                </a>
+                                <a  class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal"
+                                    data-bs-target="#modal-report" aria-label="Create new">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M12 5l0 14" />
+                                        <path d="M5 12l14 0" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body border-bottom py-3">
+                        <div class="d-flex">
+                            <div class="text-secondary">
+                                Show 
+                                <div class="mx-2 d-inline-block">
+                                  <input type="text" name="page_size" class="form-control form-control-sm" value="" size="3" aria-label="Invoices count" id="page-size-input" onchange="fetchData(1)">
+                                </div>
+                                entries
+                            </div>
+                            <div class="ms-auto text-secondary">
+                              Search:
+                              <div class="ms-2 d-inline-block">
+                                  <input type="text" name="search_filter" class="form-control form-control-sm" aria-label="Search" id="ip_range">
+                              </div>
+                              <button class="btn btn-primary btn-sm ms-2" onclick="fetchData(1)">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter text-nowrap datatable" id="data-entries">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>From IP Range</th>
+                                    <th>To IP Range</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data rows will be inserted dynamically here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer d-flex align-items-center" id="pagination-section">
+                        <!-- Pagination section will be inserted dynamically here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block script %}
+
+<script>
+  
+    function fetchData(page) {
+        var pageSize = $('#page-size-input').val();
+        var ip_range = $('#ip_range').val();
+        
+        var api_url = '{{api_url}}';
+        var token = '{{token}}';  
+        $.ajax({
+            url: api_url,
+            method: 'GET',
+            headers: {
+                'Authorization': token
+            },
+            data: { page: page, page_size:pageSize, ip_range:ip_range  },
+            success: function (data) {
+                $('#page-size-input').val(data.page_size);
+                renderData(data);
+                renderPagination(data);
+            },
+            error: function (err) {
+                var errorMessage = "An error occurred while processing your request.";
+                if (err.responseJSON) {
+                    errorMessage = '';
+                    for (var key in err.responseJSON) {
+                        if (err.responseJSON.hasOwnProperty(key)) {
+                            errorMessage += key + ": " + err.responseJSON[key] + "<br>";
+                        }
+                    }
+                }
+                openToaster("danger", errorMessage);
+            }
+        });
+    }
+
+    function renderData(data) {
+        var tbody = $('#data-entries tbody');
+        tbody.empty(); // Clear existing rows
+
+        var currentPage = data.current_page; // Assuming your API response includes current page number
+        var itemsPerPage = data.page_size;
+
+        if (data.count > 0) {
+            $.each(data.results, function (index, item) {
+                var rowIndex = (currentPage - 1) * itemsPerPage + index + 1; // Calculate row index based on current page
+                var row = '<tr>' +
+                    '<td>' + rowIndex + '</td>' +
+                    '<td>' + item.from_ip_range + '</td>' +
+                    '<td>' + item.to_ip_range + '</td>' +
+                    '<td><a href="javascript:void(0)" title="Edit" data-bs-placement="top" data-bs-toggle="modal" data-bs-target="#modal-report" onclick="addEdit(' + item.id + ')" >' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>' +
+                    '</a>' +
+                    '|' +
+                    '<a href="javascript:void(0)" onclick="deleteRecord(' + item.id + ')" title="Delete" data-bs-placement="top">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>' +
+                    '</a>' +
+                    '</td>' +
+                    '</tr>';
+                tbody.append(row);
+            });
+        } else {
+            tbody.html('<tr><td colspan="4">No data available</td></tr>');
+        }
+    }
+
+    function renderPagination(data) {
+        var paginationSection = $('#pagination-section');
+        paginationSection.empty(); // Clear existing pagination
+
+        if (data.count > 0) {
+            var paginationHtml = '<p class="m-0 text-secondary">Showing ';
+
+            var startIdx = (data.previous ? (data.previous * data.page_size) + 1 : 1);
+            var endIdx = (data.next ? (data.current_page * data.page_size) : data.count);
+
+            paginationHtml += startIdx + ' to ' + endIdx + ' of ' + data.count + ' entries</p>' +
+                '<ul class="pagination m-0 ms-auto">';
+
+            if (data.previous) {
+                paginationHtml += '<li class="page-item">' +
+                    '<a href="javascript:fetchData(' + data.previous + ')" class="page-link" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 6l-6 6l6 6"></path></svg> prev</a>' +
+                    '</li>';
+            } else {
+                paginationHtml += '<li class="page-item disabled">' +
+                    '<a class="page-link"  tabindex="-1" aria-disabled="true"><svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 6l-6 6l6 6"></path></svg> prev</a>' +
+                    '</li>';
+            }
+ 
+            for (var i = 1; i <= Math.ceil(data.count / data.page_size); i++) {
+                if (i === data.current_page) {
+                    paginationHtml += '<li class="page-item active"><a class="page-link" >' + i + '</a></li>';
+                } else {
+                    paginationHtml += '<li class="page-item "><a href="javascript:fetchData(' + i + ')" class="page-link">' + i + '</a></li>';
+                }
+            }
+
+            if (data.next) {
+                paginationHtml += '<li class="page-item">' +
+                    '<a href="javascript:fetchData(' + data.next + ')" class="page-link">' +
+                    'next' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 6l6 6l-6 6"></path></svg>' +
+                    '</a>' +
+                    '</li>';
+            } else {
+                paginationHtml += '<li class="page-item disabled">' +
+                    '<a class="page-link"  tabindex="-1" aria-disabled="true">' +
+                    'next' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 6l6 6l-6 6"></path></svg>' +
+                    '</a>' +
+                    '</li>';
+            }
+
+            paginationHtml += '</ul>';
+            paginationSection.html(paginationHtml); // Use .html() instead of .append() to replace the pagination content
+        }
+    }
+  
+    $(document).ready(function () {
+        // Fetch initial data
+        fetchData(1);
+    });
+
+    function addEdit(id = '') {
+        console.log(id);
+        $('#modal-report').html('');
+        $.ajax({
+            url: "{% url 'system_ip_pool' %}",
+            method: 'GET',
+            data: { id:id, type: 'add' },
+            success: function (data) {
+                $("#modal-report").show();
+                $('#modal-report').html(data);
+            },
+            error: function (err) {
+                var errorMessage = "An error occurred while processing your request.";
+                if (err.responseJSON) {
+                    errorMessage = '';
+                    for (var key in err.responseJSON) {
+                        if (err.responseJSON.hasOwnProperty(key)) {
+                            errorMessage += key + ": " + err.responseJSON[key] + "<br>";
+                        }
+                    }
+                }
+                openToaster("danger", errorMessage);
+            }
+        });
+    };
+
+    function deleteRecord(id) {
+        $.confirm({
+            title: 'Confirm!',
+            theme: 'material',
+            content: 'Do you want to Delete ?',
+            buttons: {
+                confirm: {
+                    btnClass: 'btn-blue',
+                    action: function () {
+                        // start ajax
+                        var api_url = '{{api_url}}'+id+'/';
+                        var token = '{{token}}';  
+                        $.ajax({
+                            url: api_url,
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': token
+                            },
+                            data: { },
+                            success: function (data) {
+                                console.log(data);
+                                openToaster("success", data.message);
+                                fetchData(1);
+                            },
+                            error: function (err) {
+                                var errorMessage = "An error occurred while processing your request.";
+                                if (err.responseJSON) {
+                                    errorMessage = '';
+                                    for (var key in err.responseJSON) {
+                                        if (err.responseJSON.hasOwnProperty(key)) {
+                                            errorMessage += key + ": " + err.responseJSON[key] + "<br>";
+                                        }
+                                    }
+                                }
+                                openToaster("danger", errorMessage);
+                            }
+                        });
+                        //end ajax
+                    }
+                },
+                cancel: {
+                    btnClass: 'btn-red',
+                    action: function () {
+
+                    }
+                },
+
+
+            }
+        });
+
+    };
+</script>
+{% endblock %}
