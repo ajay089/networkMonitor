@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from apps.frontend.models import (
-    SystemConfiguration, SystemIPPool
+    SystemConfiguration, SystemIPPool,
+    Logs
 )
 
 class DashboardDataSerializer(serializers.Serializer):
@@ -57,3 +58,21 @@ class PaginatedSystemIpPoolSerializer(serializers.Serializer):
         if 'request' in self.context:
             return int(self.context['request'].query_params.get('page', 1))
         return 1    
+
+class LogsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Logs
+        fields = '__all__'
+
+class PaginatedLogsSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    next = serializers.CharField(allow_null=True)
+    previous = serializers.CharField(allow_null=True)
+    results = LogsSerializer(many=True)
+    current_page = serializers.SerializerMethodField()
+    page_size = serializers.IntegerField()
+
+    def get_current_page(self, obj):
+        if 'request' in self.context:
+            return int(self.context['request'].query_params.get('page', 1))
+        return 1        

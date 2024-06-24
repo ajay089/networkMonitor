@@ -17,27 +17,7 @@
                         <h3 class="card-title">{{ page_title }}</h3>
                         <div class="col-auto ms-auto d-print-none">
                             <div class="btn-list">
-                                <a href="javascript:void(0)"  class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal"
-                                    data-bs-target="#modal-report" onclick="addEdit()">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M12 5l0 14" />
-                                        <path d="M5 12l14 0" />
-                                    </svg>
-                                    Create new
-                                </a>
-                                <a  class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal"
-                                    data-bs-target="#modal-report" aria-label="Create new">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M12 5l0 14" />
-                                        <path d="M5 12l14 0" />
-                                    </svg>
-                                </a>
+                                
                             </div>
                         </div>
                     </div>
@@ -53,7 +33,7 @@
                             <div class="ms-auto text-secondary">
                               Search:
                               <div class="ms-2 d-inline-block">
-                                  <input type="text" name="search_filter" class="form-control form-control-sm" aria-label="Search invoice" id="system-name-input">
+                                  <input type="text" name="search_filter" class="form-control form-control-sm" aria-label="Search" id="ip_range">
                               </div>
                               <button class="btn btn-primary btn-sm ms-2" onclick="fetchData(1)">Search</button>
                             </div>
@@ -64,10 +44,9 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>System Name</th>
-                                    <th>System Type</th>
-                                    <th>System IP</th>
-                                    <th>Action</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Devname</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -99,9 +78,9 @@
           html += '</div>';
         var tbody = $('#data-entries tbody');
         tbody.html('<tr><td colspan="4" style="text-align:center;">'+html+'</td></tr>');
-        
+
         var pageSize = $('#page-size-input').val();
-        var systemName = $('#system-name-input').val();
+        var ip_range = $('#ip_range').val();
         
         var api_url = '{{api_url}}';
         var token = '{{token}}';  
@@ -111,14 +90,23 @@
             headers: {
                 'Authorization': token
             },
-            data: { page: page, page_size:pageSize, system_name:systemName  },
+            data: { page: page, page_size:pageSize, ip_range:ip_range  },
             success: function (data) {
                 $('#page-size-input').val(data.page_size);
                 renderData(data);
                 renderPagination(data);
             },
-            error: function (error) {
-                console.error('Error fetching data:', error);
+            error: function (err) {
+                var errorMessage = "An error occurred while processing your request.";
+                if (err.responseJSON) {
+                    errorMessage = '';
+                    for (var key in err.responseJSON) {
+                        if (err.responseJSON.hasOwnProperty(key)) {
+                            errorMessage += key + ": " + err.responseJSON[key] + "<br>";
+                        }
+                    }
+                }
+                openToaster("danger", errorMessage);
             }
         });
     }
@@ -135,22 +123,14 @@
                 var rowIndex = (currentPage - 1) * itemsPerPage + index + 1; // Calculate row index based on current page
                 var row = '<tr>' +
                     '<td>' + rowIndex + '</td>' +
-                    '<td>' + item.system_name + '</td>' +
-                    '<td>' + item.system_type + '</td>' +
-                    '<td>' + item.system_ip + '</td>' +
-                    '<td><a href="javascript:void(0)" title="Edit" data-bs-placement="top" data-bs-toggle="modal" data-bs-target="#modal-report" onclick="addEdit(' + item.id + ')" >' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>' +
-                    '</a>' +
-                    '|' +
-                    '<a href="javascript:void(0)" onclick="deleteRecord(' + item.id + ')" title="Delete" data-bs-placement="top">' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>' +
-                    '</a>' +
-                    '</td>' +
+                    '<td>' + item.date + '</td>' +
+                    '<td>' + item.time + '</td>' +
+                    '<td>' + item.devname + '</td>' +
                     '</tr>';
                 tbody.append(row);
             });
         } else {
-            tbody.html('<tr><td colspan="5">No data available</td></tr>');
+            tbody.html('<tr><td colspan="4">No data available</td></tr>');
         }
     }
 
@@ -177,13 +157,13 @@
                     '</li>';
             }
  
-            for (var i = 1; i <= Math.ceil(data.count / data.page_size); i++) {
-                if (i === data.current_page) {
-                    paginationHtml += '<li class="page-item active"><a class="page-link" >' + i + '</a></li>';
-                } else {
-                    paginationHtml += '<li class="page-item "><a href="javascript:fetchData(' + i + ')" class="page-link">' + i + '</a></li>';
-                }
-            }
+            // for (var i = 1; i <= Math.ceil(data.count / data.page_size); i++) {
+            //     if (i === data.current_page) {
+            //         paginationHtml += '<li class="page-item active"><a class="page-link" >' + i + '</a></li>';
+            //     } else {
+            //         paginationHtml += '<li class="page-item "><a href="javascript:fetchData(' + i + ')" class="page-link">' + i + '</a></li>';
+            //     }
+            // }
 
             if (data.next) {
                 paginationHtml += '<li class="page-item">' +
@@ -215,7 +195,7 @@
         console.log(id);
         $('#modal-report').html('');
         $.ajax({
-            url: "{% url 'system_configuration' %}",
+            url: "{% url 'system_ip_pool' %}",
             method: 'GET',
             data: { id:id, type: 'add' },
             success: function (data) {

@@ -90,6 +90,15 @@
 <script>
   
     function fetchData(page) {
+        var html = '<div class="text-center">';
+          html += '<div class="mb-4">Data Loading...</div>';
+          html += '<div class="progress progress-sm" style="width:20%; margin:0px auto;">';
+          html += '<div class="progress-bar progress-bar-indeterminate"></div>';
+          html += '</div>';
+          html += '</div>';
+        var tbody = $('#data-entries tbody');
+        tbody.html('<tr><td colspan="4" style="text-align:center;">'+html+'</td></tr>');
+        
         var pageSize = $('#page-size-input').val();
         var ip_range = $('#ip_range').val();
         

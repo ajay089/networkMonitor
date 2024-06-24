@@ -150,7 +150,7 @@
           </div>
         </div>
 
-        <div class="col-lg-6">
+        <div class="col-lg-4">
           <div class="card">
             <div class="card-body">
               <h3 class="card-title">Firewall Security Event Severity Levels</h3>
@@ -168,11 +168,11 @@
           </div>
         </div>
 
-        <!-- <div class="col-lg-4">
+        <div class="col-lg-4">
           <div class="card">
             <div class="card-body">
-              <h3 class="card-title">Firewall Type Subtype Data</h3>
-              <div id="type-subtype-chart" class="chart-lg">
+              <h3 class="card-title">Firewall Traffic and Event Summary(Last Week)</h3>
+              <div id="traffic-event-chart" class="chart-lg">
                 <div class="card-body text-end placeholder-glow">
                   <div class="placeholder col-9 mb-3"></div>
                   <div class="placeholder placeholder-xs col-10"></div>
@@ -184,32 +184,16 @@
               </div>
             </div>
           </div>
-        </div> -->
+        </div>
         
        
         
-        <div class="col-lg-6">
+        <div class="col-lg-4">
           <div class="card">
             <div class="card-header border-0">
               <div class="card-title">Firewall Bandwidth Consumptions</div>
             </div>
             <div class="position-relative">
-              <div class="position-absolute top-0 left-0 px-3 mt-1 w-75">
-                <div class="row g-2">
-                  <div class="col-auto">
-                    <div class="chart-sparkline chart-sparkline-square" id="sparkline-activity"></div>
-                  </div>
-                  <div class="col">
-                    <!-- <div>Today's Earning: $4,262.40</div> -->
-                    <!-- <div class="text-secondary">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-inline text-green" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 17l6 -6l4 4l8 -8" /><path d="M14 7l7 0l0 7" />
-                      </svg>
-                      +5% more than yesterday
-                    </div> -->
-                  </div>
-                </div>
-              </div>
               <div id="bandwidth-chart">
                 <div class="card-body text-end placeholder-glow">
                   <div class="placeholder col-9 mb-3"></div>
@@ -258,6 +242,7 @@
      var placeholder_bandwidth = '<div class="card-body text-end placeholder-glow"><div class="placeholder col-9 mb-3"></div><div class="placeholder placeholder-xs col-10"></div><div class="placeholder placeholder-xs col-12"></div><div class="placeholder placeholder-xs col-11"></div><div class="placeholder placeholder-xs col-8"></div><div class="placeholder placeholder-xs col-10"></div></div>';
      $('#bandwidth-chart').html(placeholder_bandwidth);
      $('#chart-mentions').html(placeholder_bandwidth);
+     $('#traffic-event-chart').html(placeholder_bandwidth);
       var api_url = '{{api_url}}';
       var token = '{{token}}';  
 
@@ -310,10 +295,11 @@
               //Clear Placeholder
               $('#bandwidth-chart').html('');
               $('#chart-mentions').html('');
-              $('#type-subtype-chart').html('');
+              $('#traffic-event-chart').html('');
               // Call function to update ApexCharts with data
               updateApexChart(data.bandwidthData);
-              initOrUpdateChart(data.level_data);
+              updateseverityLevelChart(data.level_data);
+              updateTrafficEventChart(data.traffic_event_data);
 
               // Example event handler for legend item click (replace with actual event handling logic)
             $('#chart-mentions').on('click', '.apexcharts-legend-text', function() {
@@ -370,175 +356,317 @@
     }
 
     // Function to initialize or update the ApexCharts instance
-    function initOrUpdateChart(levelData) {
-        // Extracting initial data for all levels
-        let dates = levelData.map(entry => entry.date);
-        let alertData = levelData.map(entry => entry.level_data.alert || 0);
-        let errorData = levelData.map(entry => entry.level_data.error || 0);
-        let informationData = levelData.map(entry => entry.level_data.information || 0);
-        let noticeData = levelData.map(entry => entry.level_data.notice || 0);
-        let warningData = levelData.map(entry => entry.level_data.warning || 0);
+    function updateseverityLevelChart(levelData) {
+      // Extracting initial data for all levels
+      let dates = levelData.map(entry => entry.date);
+      let alertData = levelData.map(entry => entry.level_data.alert || 0);
+      let errorData = levelData.map(entry => entry.level_data.error || 0);
+      let informationData = levelData.map(entry => entry.level_data.information || 0);
+      let noticeData = levelData.map(entry => entry.level_data.notice || 0);
+      let warningData = levelData.map(entry => entry.level_data.warning || 0);
 
-        // Initialize ApexCharts if chart is not already initialized
-        if (!chart) {
-            chart = new ApexCharts(document.getElementById('chart-mentions'), {
-                chart: {
-                    type: "bar",
-                    fontFamily: 'inherit',
-                    height: 280,
-                    parentHeightOffset: 0,
-                    toolbar: {
-                        show: false,
-                    },
-                    animations: {
-                        enabled: false
-                    },
-                    stacked: true,
-                },
-                plotOptions: {
-                    bar: {
-                        columnWidth: '50%',
-                    }
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-                fill: {
-                    opacity: 1,
-                },
-                series: [
-                    { name: "Alert", data: alertData },
-                    { name: "Error", data: errorData },
-                    { name: "Information", data: informationData },
-                    { name: "Notice", data: noticeData },
-                    { name: "Warning", data: warningData }
-                ],
-                xaxis: {
-                    labels: {
-                        rotate: -45
-                    },
-                    categories: dates,
-                },
-                yaxis: {
-                    title: {
-                        text: 'Count',
-                    },
-                },
-                colors:['#FF4560', '#FF9F43', '#775DD0', '#17A2B8', '#FFC107'], // Example colors
-                legend: {
-                    show: true,
-                    position: 'top',
-                    horizontalAlign: 'right',
-                    onItemClick: {
-                        toggleDataSeries: true // Allow toggling of data series on legend click
-                    },
-                    onItemHover: {
-                        highlightDataSeries: true
-                    },
-                },
-                tooltip: {
-                    theme: 'dark'
-                },
-                grid: {
-                    padding: {
-                        top: -20,
-                        right: 0,
-                        left: -4,
-                        bottom: -4
-                    },
-                    strokeDashArray: 4,
-                    xaxis: {
-                        lines: {
-                            show: true
-                        }
-                    },
-                },
-            });
+      // Initialize ApexCharts if chart is not already initialized
+      if (!chart) {
+          chart = new ApexCharts(document.getElementById('chart-mentions'), {
+              chart: {
+                  type: "bar",
+                  fontFamily: 'inherit',
+                  height: 320,
+                  parentHeightOffset: 0,
+                  animations: {
+                      enabled: false
+                  },
+                  stacked: true,
+              },
+              plotOptions: {
+                  bar: {
+                      columnWidth: '50%',
+                  }
+              },
+              dataLabels: {
+                  enabled: false,
+              },
+              fill: {
+                  opacity: 1,
+              },
+              series: [
+                  { name: "Alert", data: alertData },
+                  { name: "Error", data: errorData },
+                  { name: "Information", data: informationData },
+                  { name: "Notice", data: noticeData },
+                  { name: "Warning", data: warningData }
+              ],
+              xaxis: {
+                  labels: {
+                      rotate: -45
+                  },
+                  categories: dates,
+              },
+              yaxis: {
+                  title: {
+                      text: 'Count',
+                  },
+              },
+              colors:['#FF4560', '#FF9F43', '#775DD0', '#17A2B8', '#FFC107'], // Example colors
+              legend: {
+                  show: true,
+                  position: 'top',
+                  horizontalAlign: 'right',
+                  onItemClick: {
+                      toggleDataSeries: true // Allow toggling of data series on legend click
+                  },
+                  onItemHover: {
+                      highlightDataSeries: true
+                  },
+              },
+              tooltip: {
+                  theme: 'dark'
+              },
+              grid: {
+                  padding: {
+                      top: -20,
+                      right: 0,
+                      left: -4,
+                      bottom: -4
+                  },
+                  strokeDashArray: 4,
+                  xaxis: {
+                      lines: {
+                          show: true
+                      }
+                  },
+              },
+          });
 
-            chart.render();
-        }
-    };
-
-    
+          chart.render();
+      } else {
+          chart.updateOptions({
+              series: [
+                  { name: "Alert", data: alertData },
+                  { name: "Error", data: errorData },
+                  { name: "Information", data: informationData },
+                  { name: "Notice", data: noticeData },
+                  { name: "Warning", data: warningData }
+              ],
+              xaxis: {
+                  categories: dates
+              }
+          });
+      }
+  }
   </script>
 
   <script>
     function updateApexChart(bandwidthData) {
     // Extract keys (dates) and values (bandwidth data) into arrays
-      var dates = [];
-      var bandwidthValues = [];
+    var dates = [];
+    var bandwidthValues = [];
 
-      for (var date in bandwidthData) {
-          if (bandwidthData.hasOwnProperty(date)) {
-              dates.push(date);
-              bandwidthValues.push(bandwidthData[date]);
+    for (var date in bandwidthData) {
+        if (bandwidthData.hasOwnProperty(date)) {
+            dates.push(date);
+            bandwidthValues.push(bandwidthData[date]);
+        }
+    }
+
+    // Initialize ApexCharts with dynamic data
+    var chart = new ApexCharts(document.getElementById('bandwidth-chart'), {
+        chart: {
+            type: "area",
+            fontFamily: 'inherit',
+            height: 356,
+            sparkline: {
+                enabled: true
+            },
+            animations: {
+                enabled: false
+            },
+            toolbar: {
+                show: true, // Show toolbar
+                tools: {
+                    download: true, // Enable download button
+                    selection: true, // Enable selection tool
+                    zoom: true, // Enable zoom tool
+                    zoomin: true, // Enable zoom in button
+                    zoomout: true, // Enable zoom out button
+                    pan: true, // Enable pan tool
+                    reset: true, // Enable reset button
+                },
+                autoSelected: 'zoom' // Initially select zoom tool
+            },
+        },
+        dataLabels: {
+            enabled: true, // Enable data labels
+            offsetY: 0, // Offset from series
+            style: {
+                fontSize: '12px',
+                colors: ["#304758"]
+            },
+            position: 'top' // Position labels above points
+        },
+        fill: {
+            opacity: .16,
+            type: 'solid'
+        },
+        stroke: {
+            width: 2,
+            lineCap: "round",
+            curve: "smooth",
+        },
+        series: [{
+            name: "Bandwidth",
+            data: bandwidthValues // Use bandwidthValues array for chart data
+        }],
+        tooltip: {
+            theme: 'dark'
+        },
+        grid: {
+            strokeDashArray: 4,
+        },
+        xaxis: {
+            labels: {
+                padding: 0,
+            },
+            tooltip: {
+                enabled: false
+            },
+            axisBorder: {
+                show: false,
+            },
+            type: 'datetime',
+            categories: dates // Use dates array for x-axis categories
+        },
+        yaxis: {
+            labels: {
+                padding: 0
+            },
+        },
+        colors: ["#007BFF"], // Example color
+        legend: {
+            show: false,
+        },
+        point: {
+            show: false
+        },
+    });
+
+    chart.render();
+}
+
+</script>
+
+<script>
+    
+    function updateTrafficEventChart(firewallData) {
+      // Extract keys (categories) and values (firewall data) into arrays
+      var categories = [];
+      var dataValues = [];
+
+      for (var category in firewallData) {
+          if (firewallData.hasOwnProperty(category)) {
+              for (var subCategory in firewallData[category]) {
+                  if (firewallData[category].hasOwnProperty(subCategory)) {
+                      categories.push(category + ": " + subCategory);
+                      dataValues.push(firewallData[category][subCategory]);
+                  }
+              }
           }
       }
 
-      // Initialize ApexCharts with dynamic data
-      new ApexCharts(document.getElementById('bandwidth-chart'), {
-          chart: {
-              type: "area",
-              fontFamily: 'inherit',
-              height: 332,
-              sparkline: {
-                  enabled: true
+      // Initialize or update ApexCharts with dynamic data
+      var chartElement = document.getElementById('traffic-event-chart');
+      if (chartElement.innerHTML === '') {
+          new ApexCharts(chartElement, {
+              chart: {
+                  id: 'traffic-event-chart',
+                  type: "bar",
+                  fontFamily: 'inherit',
+                  height: 300,
+                  animations: {
+                      enabled: false
+                  },
               },
-              animations: {
-                  enabled: false
+              dataLabels: {
+                  enabled: false,
               },
-          },
-          dataLabels: {
-              enabled: false,
-          },
-          fill: {
-              opacity: .16,
-              type: 'solid'
-          },
-          stroke: {
-              width: 2,
-              lineCap: "round",
-              curve: "smooth",
-          },
-          series: [{
-              name: "Bandwidth",
-              data: bandwidthValues // Use bandwidthValues array for chart data
-          }],
-          tooltip: {
-              theme: 'dark'
-          },
-          grid: {
-              strokeDashArray: 4,
-          },
-          xaxis: {
-              labels: {
-                  padding: 0,
+              fill: {
+                  opacity: .16,
+                  type: 'solid'
               },
+              stroke: {
+                  width: 2,
+                  lineCap: "round",
+                  curve: "smooth",
+              },
+              series: [{
+                  name: "Count",
+                  data: dataValues // Use dataValues array for chart data
+              }],
               tooltip: {
-                  enabled: false
+                  theme: 'dark'
               },
-              axisBorder: {
+              grid: {
+                  strokeDashArray: 4,
+              },
+              xaxis: {
+                  labels: {
+                      padding: 0,
+                  },
+                  tooltip: {
+                      enabled: false
+                  },
+                  axisBorder: {
+                      show: false,
+                  },
+                  categories: categories // Use categories array for x-axis categories
+              },
+              yaxis: {
+                  labels: {
+                      padding: 4
+                  },
+              },
+              colors: ["#00E396"],
+              legend: {
                   show: false,
               },
-              type: 'datetime',
-              categories: dates // Use dates array for x-axis categories
-          },
-          yaxis: {
-              labels: {
-                  padding: 4
+              annotations: {
+                  yaxis: [],
+                  xaxis: [],
+                  points: [{
+                      x: categories[categories.length - 1], // Last category
+                      y: Math.max(dataValues), // Maximum value
+                      marker: {
+                          size: 0
+                      },
+                      label: {
+                        show: false,
+                      }
+                  }]
+              }
+          }).render();
+      } else {
+          ApexCharts.exec('traffic-event-chart', 'updateOptions', {
+              xaxis: {
+                  categories: categories
               },
-          },
-          colors: [tabler.getColor("primary")],
-          legend: {
-              show: false,
-          },
-          point: {
-              show: false
-          },
-      }).render();
-};
-
-    
+              series: [{
+                  data: dataValues
+              }],
+              annotations: {
+                  points: [{
+                      x: categories[categories.length - 1],
+                      y: Math.max(dataValues),
+                      marker: {
+                          size: 0
+                      },
+                      label: {
+                        show: false,
+                      }
+                  }]
+              }
+          });
+      }
+  }
 </script>
 
 {% endblock %}

@@ -4,7 +4,10 @@ from .dashboard import(
     DashboardDataViewSet
 )
 from .masters import(
-    SystemConfigurationAPIView, SystemIpPoolAPIView
+    SystemConfigurationAPIView, SystemIpPoolAPIView,
+)
+from .reports import(
+    LogsAPIView,
 )
 
 urlpatterns = [
@@ -15,4 +18,6 @@ urlpatterns = [
 
     path('systemippool/', SystemIpPoolAPIView.as_view({'get': 'list','post': 'create'}), name='system_ip_pool'),
     path('systemippool/<int:id>/', SystemIpPoolAPIView.as_view({'put': 'update', 'get': 'retrieve', 'delete': 'destroy'}), name='system_ip_pool'),
+
+    path('logs/', LogsAPIView.as_view({'get': 'list'}), name='logs'),
 ]
