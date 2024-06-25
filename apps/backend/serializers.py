@@ -3,6 +3,7 @@ from apps.frontend.models import (
     SystemConfiguration, SystemIPPool,
     Logs
 )
+from datetime import datetime
 
 class DashboardDataSerializer(serializers.Serializer):
     totalCountToday = serializers.IntegerField()
@@ -63,6 +64,14 @@ class LogsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Logs
         fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Assuming the date field in your model is called 'date'
+        if 'date' in representation:
+            # Format the date field to the desired format, e.g., 'YYYY-MM-DD'
+            representation['date'] = datetime.strptime(representation['date'], '%Y-%m-%d').strftime('%d/%m/%Y')
+        return representation
 
 class PaginatedLogsSerializer(serializers.Serializer):
     count = serializers.IntegerField()

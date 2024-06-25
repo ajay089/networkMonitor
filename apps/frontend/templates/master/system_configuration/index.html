@@ -55,7 +55,12 @@
                               <div class="ms-2 d-inline-block">
                                   <input type="text" name="search_filter" class="form-control form-control-sm" aria-label="Search invoice" id="system-name-input">
                               </div>
-                              <button class="btn btn-primary btn-sm ms-2" onclick="fetchData(1)">Search</button>
+                              <button class="btn btn-success" type="button" style="width: 10%;" onclick="fetchData(1)">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" style="margin-left:9px; height:15px;" width="20" height="10" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                                    <path d="M21 21l-6 -6"></path>
+                                </svg>
+                              </button>
                             </div>
                         </div>
                     </div>
@@ -134,7 +139,7 @@
             $.each(data.results, function (index, item) {
                 var rowIndex = (currentPage - 1) * itemsPerPage + index + 1; // Calculate row index based on current page
                 var row = '<tr>' +
-                    '<td>' + rowIndex + '</td>' +
+                    '<td>' + rowIndex + '.</td>' +
                     '<td>' + item.system_name + '</td>' +
                     '<td>' + item.system_type + '</td>' +
                     '<td>' + item.system_ip + '</td>' +

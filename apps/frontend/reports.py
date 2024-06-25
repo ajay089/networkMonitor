@@ -1,10 +1,9 @@
-import requests
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.conf import settings
 from django.utils.decorators import method_decorator
-from django.http import JsonResponse
+from datetime import datetime
 
 @method_decorator(login_required, name='dispatch')
 class LogView(View):
@@ -18,7 +17,8 @@ class LogView(View):
         context = {
             'page_title': 'Logs Report',
             'api_url': api_url,
-            'token': token
+            'token': token,
+            'current_date':datetime.now().strftime('%Y-%m-%d')
         }
         
         return render(request, self.template, context)

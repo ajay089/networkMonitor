@@ -85,7 +85,7 @@ class DashboardDataViewSet(viewsets.ViewSet):
                     level,
                     COUNT(*) AS count
                 FROM logs
-                WHERE date >= %s
+                WHERE date > %s
                 GROUP BY date, level
                 ORDER BY date DESC;
             """
@@ -155,13 +155,13 @@ class DashboardDataViewSet(viewsets.ViewSet):
             # Process bandwidth data
             bandwidth_data = {}
             for row in bandwidth_rows:
-                date_str = row[0].strftime('%Y-%m-%d')  # Convert date to string
+                date_str = row[0].strftime('%d %B')  # Convert date to string
                 bandwidth_data[date_str] = row[1]
 
             # Ensure all dates within range are included and set to 0 if data is missing
             current_date = start_date
             while current_date <= end_date:
-                date_str = current_date.strftime('%Y-%m-%d')
+                date_str = current_date.strftime('%d %B')
                 if date_str not in bandwidth_data:
                     bandwidth_data[date_str] = 0
                 current_date += timedelta(days=1)
@@ -244,6 +244,7 @@ class DashboardDataViewSet(viewsets.ViewSet):
                 level_rows                  = future_level_data.result()
                 traffic_event_rows          = future_traffic_event_data.result()
                 server_wise_log_data_rows   = fetch_server_wise_log_data.result()
+
             # Format data
             formatted_data = self.format_data(main_row, bandwidth_rows, level_rows, traffic_event_rows, server_wise_log_data_rows, start_date, end_date)
 

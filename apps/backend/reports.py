@@ -18,7 +18,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 
 class CustomPagination(PageNumberPagination):
-    page_size = 100
+    page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -45,9 +45,9 @@ class LogsAPIView(ViewSet):
             queryset = Logs.objects.all().order_by('date')
 
             # Filtering by date
-            date_filter = request.GET.get('date', None)
+            date_filter = request.GET.get('date_filter', None)
             if date_filter:
-                queryset = queryset.filter(date_filter=date_filter)
+                queryset = queryset.filter(date=date_filter)
 
             # Pagination
             paginator = Paginator(queryset, self.get_page_size(request))
@@ -72,14 +72,14 @@ class LogsAPIView(ViewSet):
             raise APIException({"error": str(e)})
 
     def get_page_size(self, request):
-        page_size_param = request.GET.get('page_size', '100')  # Default page_size is '10'
+        page_size_param = request.GET.get('page_size', '10')  # Default page_size is '10'
         
         try:
             page_size = int(page_size_param)
             if page_size <= 0:
-                page_size = 100  # Default to 10 if page_size is non-positive
+                page_size = 10  # Default to 10 if page_size is non-positive
         except ValueError:
-            page_size = 100  # Default to 10 if page_size_param is not a valid integer
+            page_size = 10  # Default to 10 if page_size_param is not a valid integer
 
         return page_size
 

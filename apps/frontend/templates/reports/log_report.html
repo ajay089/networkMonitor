@@ -31,11 +31,33 @@
                                 entries
                             </div>
                             <div class="ms-auto text-secondary">
-                              Search:
-                              <div class="ms-2 d-inline-block">
-                                  <input type="text" name="search_filter" class="form-control form-control-sm" aria-label="Search" id="ip_range">
+                                <div class="row">
+                                <div class="col-lg-8">
+                                  <div class="mb-0">
+                                    <div class="input-icon mb-2">
+                                    <input class="form-control " placeholder="Select a date" id="datepicker-icon" name="date_filter" value="{{current_date}}" readonly />
+                                      <span class="input-icon-addon"><!-- Download SVG icon from http://tabler-icons.io/i/calendar -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-lg-1">
+                                  <div class="mb-0">
+                                   <button class="btn btn-success" id="updateBtn" type="button" style="width: 100%;" onclick="fetchData(1)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" style="margin-left:9px;" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                                            <path d="M21 21l-6 -6"></path>
+                                        </svg>
+                                    </button>
+                                  </div>
+                                </div>
+        
+                                <div>
+        
                               </div>
-                              <button class="btn btn-primary btn-sm ms-2" onclick="fetchData(1)">Search</button>
+                              </div>
+                              
                             </div>
                         </div>
                     </div>
@@ -47,6 +69,45 @@
                                     <th>Date</th>
                                     <th>Time</th>
                                     <th>Devname</th>
+                                    <th>Devid</th>
+                                    <th>Eventtime</th>
+                                    <th>Tz</th>
+                                    <th>Logid</th>
+                                    <th>Type</th>
+                                    <th>Subtype</th>
+                                    <th>Level</th>
+                                    <th>Vd</th>
+                                    <th>Srcip</th>
+                                    <th>Srcname</th>
+                                    <th>Srcport</th>
+                                    <th>Srcintf</th>
+                                    <th>Srcintfrole</th>
+                                    <th>Dstip</th>
+                                    <th>Dstport</th>
+                                    <th>Dstintf</th>
+                                    <th>Dstintfrole</th>
+                                    <th>Srccountry</th>
+                                    <th>Dstcountry</th>
+                                    <th>Sessionid</th>
+                                    <th>Proto</th>
+                                    <th>Action</th>
+                                    <th>Policyid</th>
+                                    <th>Policytype</th>
+                                    <th>Service</th>
+                                    <th>Trandisp</th>
+                                    <th>Duration</th>
+                                    <th>Sentbyte</th>
+                                    <th>Rcvdbyte</th>
+                                    <th>Sentpkt</th>
+                                    <th>Rcvdpkt</th>
+                                    <th>Appcat</th>
+                                    <th>Crscore</th>
+                                    <th>Craction</th>
+                                    <th>Crlevel</th>
+                                    <th>Srchwvendor</th>
+                                    <th>Mastersrcmac</th>
+                                    <th>Srcmac</th>
+                                    <th>Srcserver</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -66,7 +127,22 @@
 {% endblock content %}
 
 {% block script %}
-
+<script src="{% static 'dist/libs/litepicker/dist/litepicker.js' %}" defer></script> 
+    <script>
+      // @formatter:off
+      document.addEventListener("DOMContentLoaded", function () {
+        window.Litepicker && (new Litepicker({
+          element: document.getElementById('datepicker-icon'),
+          buttonText: {
+            previousMonth: `<!-- Download SVG icon from http://tabler-icons.io/i/chevron-left -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>`,
+            nextMonth: `<!-- Download SVG icon from http://tabler-icons.io/i/chevron-right -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>`,
+          },
+        }));
+      });
+      // @formatter:on
+    </script>
 <script>
   
     function fetchData(page) {
@@ -77,11 +153,10 @@
           html += '</div>';
           html += '</div>';
         var tbody = $('#data-entries tbody');
-        tbody.html('<tr><td colspan="4" style="text-align:center;">'+html+'</td></tr>');
+        tbody.html('<tr><td colspan="23" style="text-align:center;">'+html+'</td><td colspan="20" style="text-align:center;"></td></tr>');
 
         var pageSize = $('#page-size-input').val();
-        var ip_range = $('#ip_range').val();
-        
+        var date_filter = $('#datepicker-icon').val();
         var api_url = '{{api_url}}';
         var token = '{{token}}';  
         $.ajax({
@@ -90,7 +165,7 @@
             headers: {
                 'Authorization': token
             },
-            data: { page: page, page_size:pageSize, ip_range:ip_range  },
+            data: { page: page, page_size:pageSize, date_filter:date_filter  },
             success: function (data) {
                 $('#page-size-input').val(data.page_size);
                 renderData(data);
@@ -122,15 +197,55 @@
             $.each(data.results, function (index, item) {
                 var rowIndex = (currentPage - 1) * itemsPerPage + index + 1; // Calculate row index based on current page
                 var row = '<tr>' +
-                    '<td>' + rowIndex + '</td>' +
+                    '<td>' + rowIndex + '.</td>' +
                     '<td>' + item.date + '</td>' +
                     '<td>' + item.time + '</td>' +
                     '<td>' + item.devname + '</td>' +
+                    '<td>' + item.devid + '</td>' +
+                    '<td>' + item.eventtime + '</td>' +
+                    '<td>' + item.tz + '</td>' +
+                    '<td>' + item.logid + '</td>' +
+                    '<td>' + item.type + '</td>' +
+                    '<td>' + item.subtype + '</td>' +
+                    '<td>' + item.level + '</td>' +
+                    '<td>' + item.vd + '</td>' +
+                    '<td>' + item.srcip + '</td>' +
+                    '<td>' + item.srcname + '</td>' +
+                    '<td>' + item.srcport + '</td>' +
+                    '<td>' + item.srcintf + '</td>' +
+                    '<td>' + item.srcintfrole + '</td>' +
+                    '<td>' + item.dstip + '</td>' +
+                    '<td>' + item.dstport + '</td>' +
+                    '<td>' + item.dstintf + '</td>' +
+                    '<td>' + item.dstintfrole + '</td>' +
+                    '<td>' + item.srccountry + '</td>' +
+                    '<td>' + item.dstcountry + '</td>' +
+                    '<td>' + item.sessionid + '</td>' +
+                    '<td>' + item.proto + '</td>' +
+                    '<td>' + item.action + '</td>' +
+                    '<td>' + item.policyid + '</td>' +
+                    '<td>' + item.policytype + '</td>' +
+                    '<td>' + item.service + '</td>' +
+                    '<td>' + item.trandisp + '</td>' +
+                    '<td>' + item.duration + '</td>' +
+                    '<td>' + item.sentbyte + '</td>' +
+                    '<td>' + item.rcvdbyte + '</td>' +
+                    '<td>' + item.sentpkt + '</td>' +
+                    '<td>' + item.rcvdpkt + '</td>' +
+                    '<td>' + item.appcat + '</td>' +
+                    '<td>' + item.crscore + '</td>' +
+                    '<td>' + item.craction + '</td>' +
+                    '<td>' + item.crlevel + '</td>' +
+                    '<td>' + item.srchwvendor + '</td>' +
+                    '<td>' + item.mastersrcmac + '</td>' +
+                    '<td>' + item.srcmac + '</td>' +
+                    '<td>' + item.srcserver + '</td>' +
                     '</tr>';
+
                 tbody.append(row);
             });
         } else {
-            tbody.html('<tr><td colspan="4">No data available</td></tr>');
+            tbody.html('<tr><td colspan="43">No data available</td></tr>');
         }
     }
 

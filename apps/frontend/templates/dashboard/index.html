@@ -3,6 +3,11 @@
 {% block content %}
 {% load static %}
 {% block style %}
+<style>
+  #toggleButton {
+      margin-left: 10px; /* Adjust spacing between title and button */
+  }
+</style>
 {% endblock %}
 
 <!-- Page header -->
@@ -152,62 +157,84 @@
 
         <div class="col-lg-4">
           <div class="card">
-            <div class="card-body">
-              <h3 class="card-title">Firewall Security Event Severity Levels</h3>
-              <div id="chart-mentions" class="chart-lg">
-                <div class="card-body text-end placeholder-glow">
-                  <div class="placeholder col-9 mb-3"></div>
-                  <div class="placeholder placeholder-xs col-10"></div>
-                  <div class="placeholder placeholder-xs col-12"></div>
-                  <div class="placeholder placeholder-xs col-11"></div>
-                  <div class="placeholder placeholder-xs col-8"></div>
-                  <div class="placeholder placeholder-xs col-10"></div>
-                </div>
+              <div class="card-body">
+                  <h3 class="card-title d-flex justify-content-between align-items-center">
+                      Firewall Security Event Severity Levels (Last Week)
+                      <button id="toggleButtonSeverityLevel" class="btn btn-primary">Show Table</button>
+                  </h3>
+                  <div id="chart-mentions" class="chart-lg">
+                      <div class="card-body text-end placeholder-glow">
+                          <div class="placeholder col-9 mb-3"></div>
+                          <div class="placeholder placeholder-xs col-10"></div>
+                          <div class="placeholder placeholder-xs col-12"></div>
+                          <div class="placeholder placeholder-xs col-11"></div>
+                          <div class="placeholder placeholder-xs col-8"></div>
+                          <div class="placeholder placeholder-xs col-10"></div>
+                      </div>
+                  </div>
+                  <div id="tableContainerSeverityLevel" class="d-none">
+                      <table id="severity-level-table" class="table table-striped"></table>
+                  </div>
               </div>
-            </div>
           </div>
-        </div>
+      </div>
+      
+      
 
+        
         <div class="col-lg-4">
           <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">Firewall Security Type and Sub Type Levels (Last Week)</h3>
+                    <button id="toggleButton" class="btn btn-primary mb-3">Show Table</button>
+                </div>
+                  <div id="chartContainer" class="chart-lg">
+                      <div id="traffic-event-chart">
+                        <div class="card-body text-end placeholder-glow">
+                          <div class="placeholder col-9 mb-3"></div>
+                          <div class="placeholder placeholder-xs col-10"></div>
+                          <div class="placeholder placeholder-xs col-12"></div>
+                          <div class="placeholder placeholder-xs col-11"></div>
+                          <div class="placeholder placeholder-xs col-8"></div>
+                          <div class="placeholder placeholder-xs col-10"></div>
+                        </div>
+                      </div>
+                  </div>
+                  <div id="tableContainer" class="d-none">
+                      <table id="traffic-event-table" class="table table-striped"></table>
+                  </div>
+              </div>
+          </div>
+      </div>
+      
+        
+      <div class="col-lg-4">
+        <div class="card">
             <div class="card-body">
-              <h3 class="card-title">Firewall Traffic and Event Summary(Last Week)</h3>
-              <div id="traffic-event-chart" class="chart-lg">
-                <div class="card-body text-end placeholder-glow">
-                  <div class="placeholder col-9 mb-3"></div>
-                  <div class="placeholder placeholder-xs col-10"></div>
-                  <div class="placeholder placeholder-xs col-12"></div>
-                  <div class="placeholder placeholder-xs col-11"></div>
-                  <div class="placeholder placeholder-xs col-8"></div>
-                  <div class="placeholder placeholder-xs col-10"></div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">Firewall Bandwidth Consumptions in MB (Last Week)</h3>
+                    <button id="toggleButtonConsumptions" class="btn btn-primary mb-3">Show Table</button>
                 </div>
+                <div id="bandwidth-chart" class="chart-lg">
+                  <div class="card-body text-end placeholder-glow">
+                      <div class="placeholder col-9 mb-3"></div>
+                      <div class="placeholder placeholder-xs col-10"></div>
+                      <div class="placeholder placeholder-xs col-12"></div>
+                      <div class="placeholder placeholder-xs col-11"></div>
+                      <div class="placeholder placeholder-xs col-8"></div>
+                      <div class="placeholder placeholder-xs col-10"></div>
+                  </div>
               </div>
-            </div>
-          </div>
-        </div>
-        
-       
-        
-        <div class="col-lg-4">
-          <div class="card">
-            <div class="card-header border-0">
-              <div class="card-title">Firewall Bandwidth Consumptions</div>
-            </div>
-            <div class="position-relative">
-              <div id="bandwidth-chart">
-                <div class="card-body text-end placeholder-glow">
-                  <div class="placeholder col-9 mb-3"></div>
-                  <div class="placeholder placeholder-xs col-10"></div>
-                  <div class="placeholder placeholder-xs col-12"></div>
-                  <div class="placeholder placeholder-xs col-11"></div>
-                  <div class="placeholder placeholder-xs col-8"></div>
-                  <div class="placeholder placeholder-xs col-10"></div>
+                <div id="tableContainerConsumptions" class="d-none">
+                    <table id="traffic-event-table" class="table table-striped">
+                        <!-- Table content will be dynamically populated -->
+                    </table>
                 </div>
-              </div>
             </div>
-           
-          </div>
         </div>
+    </div>
+    
        
        
       </div>
@@ -357,206 +384,334 @@
 
     // Function to initialize or update the ApexCharts instance
     function updateseverityLevelChart(levelData) {
-      // Extracting initial data for all levels
-      let dates = levelData.map(entry => entry.date);
-      let alertData = levelData.map(entry => entry.level_data.alert || 0);
-      let errorData = levelData.map(entry => entry.level_data.error || 0);
-      let informationData = levelData.map(entry => entry.level_data.information || 0);
-      let noticeData = levelData.map(entry => entry.level_data.notice || 0);
-      let warningData = levelData.map(entry => entry.level_data.warning || 0);
+        // Extracting initial data for all levels
+        let dates = levelData.map(entry => entry.date);
+        let alertData = levelData.map(entry => entry.level_data.alert || 0);
+        let errorData = levelData.map(entry => entry.level_data.error || 0);
+        let informationData = levelData.map(entry => entry.level_data.information || 0);
+        let noticeData = levelData.map(entry => entry.level_data.notice || 0);
+        let warningData = levelData.map(entry => entry.level_data.warning || 0);
 
-      // Initialize ApexCharts if chart is not already initialized
-      if (!chart) {
-          chart = new ApexCharts(document.getElementById('chart-mentions'), {
-              chart: {
-                  type: "bar",
-                  fontFamily: 'inherit',
-                  height: 320,
-                  parentHeightOffset: 0,
-                  animations: {
-                      enabled: false
-                  },
-                  stacked: true,
-              },
-              plotOptions: {
-                  bar: {
-                      columnWidth: '50%',
-                  }
-              },
-              dataLabels: {
-                  enabled: false,
-              },
-              fill: {
-                  opacity: 1,
-              },
-              series: [
-                  { name: "Alert", data: alertData },
-                  { name: "Error", data: errorData },
-                  { name: "Information", data: informationData },
-                  { name: "Notice", data: noticeData },
-                  { name: "Warning", data: warningData }
-              ],
-              xaxis: {
-                  labels: {
-                      rotate: -45
-                  },
-                  categories: dates,
-              },
-              yaxis: {
-                  title: {
-                      text: 'Count',
-                  },
-              },
-              colors:['#FF4560', '#FF9F43', '#775DD0', '#17A2B8', '#FFC107'], // Example colors
-              legend: {
-                  show: true,
-                  position: 'top',
-                  horizontalAlign: 'right',
-                  onItemClick: {
-                      toggleDataSeries: true // Allow toggling of data series on legend click
-                  },
-                  onItemHover: {
-                      highlightDataSeries: true
-                  },
-              },
-              tooltip: {
-                  theme: 'dark'
-              },
-              grid: {
-                  padding: {
-                      top: -20,
-                      right: 0,
-                      left: -4,
-                      bottom: -4
-                  },
-                  strokeDashArray: 4,
-                  xaxis: {
-                      lines: {
-                          show: true
-                      }
-                  },
-              },
-          });
+        // Initialize or update ApexCharts if chart is not already initialized
+        if (!chart) {
+            chart = new ApexCharts(document.getElementById('chart-mentions'), {
+                chart: {
+                    type: "bar",
+                    fontFamily: 'inherit',
+                    height: 320,
+                    parentHeightOffset: 0,
+                    animations: {
+                        enabled: false
+                    },
+                    stacked: true,
+                },
+                plotOptions: {
+                    bar: {
+                        columnWidth: '50%',
+                    }
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+                fill: {
+                    opacity: 1,
+                },
+                series: [
+                    { name: "Alert", data: alertData },
+                    { name: "Error", data: errorData },
+                    { name: "Information", data: informationData },
+                    { name: "Notice", data: noticeData },
+                    { name: "Warning", data: warningData }
+                ],
+                xaxis: {
+                    labels: {
+                        rotate: -45
+                    },
+                    categories: dates,
+                },
+                yaxis: {
+                    title: {
+                        text: 'Count',
+                    },
+                },
+                colors:['#FF4560', '#FF9F43', '#775DD0', '#17A2B8', '#FFC107'], // Example colors
+                legend: {
+                    show: true,
+                    position: 'top',
+                    horizontalAlign: 'right',
+                    onItemClick: {
+                        toggleDataSeries: true // Allow toggling of data series on legend click
+                    },
+                    onItemHover: {
+                        highlightDataSeries: true
+                    },
+                },
+                tooltip: {
+                    theme: 'dark'
+                },
+                grid: {
+                    padding: {
+                        top: -20,
+                        right: 0,
+                        left: -4,
+                        bottom: -4
+                    },
+                    strokeDashArray: 4,
+                    xaxis: {
+                        lines: {
+                            show: true
+                        }
+                    },
+                },
+            });
 
-          chart.render();
-      } else {
-          chart.updateOptions({
-              series: [
-                  { name: "Alert", data: alertData },
-                  { name: "Error", data: errorData },
-                  { name: "Information", data: informationData },
-                  { name: "Notice", data: noticeData },
-                  { name: "Warning", data: warningData }
-              ],
-              xaxis: {
-                  categories: dates
-              }
-          });
-      }
-  }
+            chart.render();
+        } else {
+            chart.updateOptions({
+                series: [
+                    { name: "Alert", data: alertData },
+                    { name: "Error", data: errorData },
+                    { name: "Information", data: informationData },
+                    { name: "Notice", data: noticeData },
+                    { name: "Warning", data: warningData }
+                ],
+                xaxis: {
+                    categories: dates
+                }
+            });
+        }
+
+        // Update or create the table
+        var tableElement = document.getElementById('severity-level-table');
+        if (!tableElement) {
+            // Create the table if it doesn't exist
+            tableElement = document.createElement('table');
+            tableElement.id = 'severity-level-table';
+            tableElement.className = 'table table-striped';
+            var tableContainer = document.getElementById('tableContainerSeverityLevel');
+            if (tableContainer) {
+                tableContainer.appendChild(tableElement);
+            } else {
+                document.body.appendChild(tableElement); // Append to the body or another container
+            }
+        }
+
+        // Clear the existing table content
+        tableElement.innerHTML = '';
+
+        // Create table header
+        var header = tableElement.createTHead();
+        var headerRow = header.insertRow(0);
+        var headerCell0 = document.createElement('th');
+        headerCell0.innerHTML = 'Date';
+        headerRow.appendChild(headerCell0);
+        var headerCell1 = document.createElement('th');
+        headerCell1.innerHTML = 'Alert';
+        headerRow.appendChild(headerCell1);
+        var headerCell2 = document.createElement('th');
+        headerCell2.innerHTML = 'Error';
+        headerRow.appendChild(headerCell2);
+        var headerCell3 = document.createElement('th');
+        headerCell3.innerHTML = 'Information';
+        headerRow.appendChild(headerCell3);
+        var headerCell4 = document.createElement('th');
+        headerCell4.innerHTML = 'Notice';
+        headerRow.appendChild(headerCell4);
+        var headerCell5 = document.createElement('th');
+        headerCell5.innerHTML = 'Warning';
+        headerRow.appendChild(headerCell5);
+
+        // Create table body
+        var body = tableElement.createTBody();
+        for (var i = 0; i < levelData.length; i++) {
+            var row = body.insertRow();
+            var cell0 = row.insertCell(0);
+            cell0.textContent = levelData[i].date;
+            var cell1 = row.insertCell(1);
+            cell1.textContent = alertData[i];
+            var cell2 = row.insertCell(2);
+            cell2.textContent = errorData[i];
+            var cell3 = row.insertCell(3);
+            cell3.textContent = informationData[i];
+            var cell4 = row.insertCell(4);
+            cell4.textContent = noticeData[i];
+            var cell5 = row.insertCell(5);
+            cell5.textContent = warningData[i];
+        }
+
+        // Toggle logic
+        var toggleButton = document.getElementById('toggleButtonSeverityLevel');
+        var chartContainer = document.getElementById('chart-mentions');
+        var tableContainer = document.getElementById('tableContainerSeverityLevel');
+
+        toggleButton.addEventListener('click', function() {
+            if (chartContainer.classList.contains('d-none')) {
+                chartContainer.classList.remove('d-none');
+                tableContainer.classList.add('d-none');
+                toggleButton.textContent = 'Show Table';
+            } else {
+                chartContainer.classList.add('d-none');
+                tableContainer.classList.remove('d-none');
+                toggleButton.textContent = 'Show Chart';
+            }
+        });
+    }
+
   </script>
 
   <script>
     function updateApexChart(bandwidthData) {
-    // Extract keys (dates) and values (bandwidth data) into arrays
-    var dates = [];
-    var bandwidthValues = [];
+      // Extract keys (dates) and values (bandwidth data) into arrays
+      var dates = [];
+      var bandwidthValues = [];
 
-    for (var date in bandwidthData) {
-        if (bandwidthData.hasOwnProperty(date)) {
-            dates.push(date);
-            bandwidthValues.push(bandwidthData[date]);
-        }
-    }
+      for (var date in bandwidthData) {
+          if (bandwidthData.hasOwnProperty(date)) {
+              dates.push(date);
+              bandwidthValues.push(bandwidthData[date]);
+          }
+      }
 
-    // Initialize ApexCharts with dynamic data
-    var chart = new ApexCharts(document.getElementById('bandwidth-chart'), {
-        chart: {
-            type: "area",
-            fontFamily: 'inherit',
-            height: 356,
-            sparkline: {
-                enabled: true
-            },
-            animations: {
-                enabled: false
-            },
-            toolbar: {
-                show: true, // Show toolbar
-                tools: {
-                    download: true, // Enable download button
-                    selection: true, // Enable selection tool
-                    zoom: true, // Enable zoom tool
-                    zoomin: true, // Enable zoom in button
-                    zoomout: true, // Enable zoom out button
-                    pan: true, // Enable pan tool
-                    reset: true, // Enable reset button
-                },
-                autoSelected: 'zoom' // Initially select zoom tool
-            },
-        },
-        dataLabels: {
-            enabled: true, // Enable data labels
-            offsetY: 0, // Offset from series
-            style: {
-                fontSize: '12px',
-                colors: ["#304758"]
-            },
-            position: 'top' // Position labels above points
-        },
-        fill: {
-            opacity: .16,
-            type: 'solid'
-        },
-        stroke: {
-            width: 2,
-            lineCap: "round",
-            curve: "smooth",
-        },
-        series: [{
-            name: "Bandwidth",
-            data: bandwidthValues // Use bandwidthValues array for chart data
-        }],
-        tooltip: {
-            theme: 'dark'
-        },
-        grid: {
-            strokeDashArray: 4,
-        },
-        xaxis: {
-            labels: {
-                padding: 0,
-            },
-            tooltip: {
-                enabled: false
-            },
-            axisBorder: {
-                show: false,
-            },
-            type: 'datetime',
-            categories: dates // Use dates array for x-axis categories
-        },
-        yaxis: {
-            labels: {
-                padding: 0
-            },
-        },
-        colors: ["#007BFF"], // Example color
-        legend: {
-            show: false,
-        },
-        point: {
-            show: false
-        },
-    });
+      // Initialize ApexCharts with dynamic data
+      var chart = new ApexCharts(document.getElementById('bandwidth-chart'), {
+          chart: {
+              type: "area",
+              fontFamily: 'inherit',
+              height: 356,
+              sparkline: {
+                  enabled: true
+              },
+              animations: {
+                  enabled: false
+              },
+              toolbar: {
+                  show: true,
+                  tools: {
+                      download: true,
+                      selection: true,
+                      zoom: true,
+                      zoomin: true,
+                      zoomout: true,
+                      pan: true,
+                      reset: true,
+                  },
+                  autoSelected: 'zoom'
+              },
+          },
+          dataLabels: {
+              enabled: true,
+              offsetY: 0,
+              style: {
+                  fontSize: '12px',
+                  colors: ["#304758"]
+              },
+              position: 'top'
+          },
+          fill: {
+              opacity: .16,
+              type: 'solid'
+          },
+          stroke: {
+              width: 2,
+              lineCap: "round",
+              curve: "smooth",
+          },
+          series: [{
+              name: "Bandwidth",
+              data: bandwidthValues
+          }],
+          tooltip: {
+              theme: 'dark'
+          },
+          grid: {
+              strokeDashArray: 4,
+          },
+          xaxis: {
+              labels: {
+                  padding: 0,
+              },
+              tooltip: {
+                  enabled: false
+              },
+              axisBorder: {
+                  show: false,
+              },
+              type: 'datetime',
+              categories: dates
+          },
+          yaxis: {
+              labels: {
+                  padding: 0
+              },
+          },
+          colors: ["#007BFF"],
+          legend: {
+              show: false,
+          },
+          point: {
+              show: false
+          },
+      });
 
-    chart.render();
-}
+      chart.render();
+
+      // Update or create the table
+      var tableElement = document.getElementById('bandwidth-table');
+      if (!tableElement) {
+          tableElement = document.createElement('table');
+          tableElement.id = 'bandwidth-table';
+          tableElement.className = 'table table-striped';
+          var tableContainer = document.getElementById('tableContainerConsumptions');
+          if (tableContainer) {
+              tableContainer.appendChild(tableElement);
+          } else {
+              document.body.appendChild(tableElement); // Append to the body or another container
+          }
+
+          // Create table header
+          var headerRow = tableElement.createTHead().insertRow();
+          var headers = ['Date', 'Bandwidth (MB)'];
+          headers.forEach(function(headerText) {
+              var th = document.createElement('th');
+              th.textContent = headerText;
+              headerRow.appendChild(th);
+          });
+      }
+
+      // Clear existing table body
+      tableElement.tBodies[0]?.remove();
+
+      // Create table body
+      var body = tableElement.createTBody();
+      for (var i = 0; i < dates.length; i++) {
+          var row = body.insertRow();
+          var cell0 = row.insertCell(0);
+          cell0.textContent = dates[i];
+          var cell1 = row.insertCell(1);
+          cell1.textContent = bandwidthValues[i];
+      }
+
+      // Toggle logic
+      var toggleButton = document.getElementById('toggleButtonConsumptions');
+      var chartContainer = document.getElementById('bandwidth-chart');
+      var tableContainer = document.getElementById('tableContainerConsumptions');
+
+      toggleButton.addEventListener('click', function() {
+          if (chartContainer.classList.contains('d-none')) {
+              chartContainer.classList.remove('d-none');
+              tableContainer.classList.add('d-none');
+              toggleButton.textContent = 'Show Table';
+          } else {
+              chartContainer.classList.add('d-none');
+              tableContainer.classList.remove('d-none');
+              toggleButton.textContent = 'Show Chart';
+          }
+      });
+  }
 
 </script>
 
 <script>
-    
     function updateTrafficEventChart(firewallData) {
       // Extract keys (categories) and values (firewall data) into arrays
       var categories = [];
@@ -639,7 +794,7 @@
                           size: 0
                       },
                       label: {
-                        show: false,
+                          show: false,
                       }
                   }]
               }
@@ -660,13 +815,64 @@
                           size: 0
                       },
                       label: {
-                        show: false,
+                          show: false,
                       }
                   }]
               }
           });
       }
+
+      // Create or update the table
+      var tableElement = document.getElementById('traffic-event-table');
+      if (!tableElement) {
+          // Create the table if it doesn't exist
+          tableElement = document.createElement('table');
+          tableElement.id = 'traffic-event-table';
+          document.body.appendChild(tableElement); // Append to the body or another container
+      }
+
+      // Clear the existing table content
+      tableElement.innerHTML = '';
+
+      // Create table header
+      var header = tableElement.createTHead();
+      var headerRow = header.insertRow(0);
+      var headerCell1 = document.createElement('th');
+      headerCell1.innerHTML = 'Security Type and Sub Type';
+      var headerCell2 = document.createElement('th');
+      headerCell2.innerHTML = 'Count';
+      headerRow.appendChild(headerCell1);
+      headerRow.appendChild(headerCell2);
+
+      // Create table body
+      var body = tableElement.createTBody();
+      for (var i = 0; i < categories.length; i++) {
+          var row = body.insertRow();
+          var cell1 = row.insertCell(0);
+          var cell2 = row.insertCell(1);
+          cell1.innerHTML = categories[i];
+          cell2.innerHTML = dataValues[i];
+      }
+
+      // Toggle logic
+      var toggleButton = document.getElementById('toggleButton');
+      var chartContainer = document.getElementById('chartContainer');
+      var tableContainer = document.getElementById('tableContainer');
+
+      toggleButton.addEventListener('click', function() {
+          if (chartContainer.classList.contains('d-none')) {
+              chartContainer.classList.remove('d-none');
+              tableContainer.classList.add('d-none');
+              toggleButton.textContent = 'Show Table';
+          } else {
+              chartContainer.classList.add('d-none');
+              tableContainer.classList.remove('d-none');
+              toggleButton.textContent = 'Show Chart';
+          }
+      });
   }
+
+
 </script>
 
 {% endblock %}
