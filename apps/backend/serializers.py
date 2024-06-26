@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from apps.frontend.models import (
+from apps.backend.models import (
     SystemConfiguration, SystemIPPool,
-    Logs
+    Logs, Department
 )
 from datetime import datetime
 
@@ -42,10 +42,22 @@ class PaginatedSystemConfigurationSerializer(serializers.Serializer):
             return int(self.context['request'].query_params.get('page', 1))
         return 
 
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = ['id', 'department_name']
+
 class SystemIpPoolSerializer(serializers.ModelSerializer):
+    department = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all())
+
     class Meta:
         model = SystemIPPool
-        fields = ['id', 'from_ip_range', 'to_ip_range']
+        fields = ['id', 'department', 'from_ip_range', 'to_ip_range']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['department'] = DepartmentSerializer(instance.department).data
+        return representation
 
 class PaginatedSystemIpPoolSerializer(serializers.Serializer):
     count = serializers.IntegerField()
@@ -58,7 +70,7 @@ class PaginatedSystemIpPoolSerializer(serializers.Serializer):
     def get_current_page(self, obj):
         if 'request' in self.context:
             return int(self.context['request'].query_params.get('page', 1))
-        return 1    
+        return 1
 
 class LogsSerializer(serializers.ModelSerializer):
     class Meta:

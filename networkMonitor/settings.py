@@ -20,7 +20,6 @@ API_BASE_URL = 'http://172.16.22.5:8012'
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -30,6 +29,7 @@ INSTALLED_APPS = [
     'apps.frontend.apps.FrontendConfig',
     'rest_framework',
     'rest_framework.authtoken',
+    'django.contrib.admin',
     'drf_yasg',
     'corsheaders'
 ]

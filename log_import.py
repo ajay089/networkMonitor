@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'networkMonitor.settings')
 # Setup Django environment
 django.setup()
 
-from apps.frontend.models import Logs
+from apps.backend.models import Logs
 
 # Read the text file
 file_path = os.path.join('media', 'raw_data.log')

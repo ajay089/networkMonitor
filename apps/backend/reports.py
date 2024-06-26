@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from apps.frontend.models import(
+from apps.backend.models import(
     Logs
 )
 from .serializers import (

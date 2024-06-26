@@ -5,6 +5,9 @@ from django.shortcuts import render
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.http import JsonResponse
+from apps.backend.models import(
+    Department
+)
 
 @method_decorator(login_required, name='dispatch')
 class SystemConfigurationView(View):
@@ -76,6 +79,9 @@ class SystemIpPoolView(View):
     def get(self, request, *args, **kwargs):
         if 'type' in request.GET and request.GET['type'] == 'add':
             try:
+                departments = Department.objects.filter().order_by('department_name')
+                print(departments)
+
                 # Fetch the 'id' from GET parameters
                 id = request.GET.get('id')
                 api_url = f"{settings.API_BASE_URL}/api/systemippool/"
@@ -97,6 +103,7 @@ class SystemIpPoolView(View):
                             'page_title': page_title,
                             'api_url': api_url,
                             'token': token,
+                            'departments':departments,
                             'result': response.json()
                         }
                         
@@ -110,6 +117,7 @@ class SystemIpPoolView(View):
 
                     context = {
                         'page_title': page_title,
+                        'departments':departments,
                         'api_url': api_url,
                         'token': token
                     }
@@ -118,12 +126,14 @@ class SystemIpPoolView(View):
             except Exception as e:
                 return JsonResponse({'message': str(e)}, status=500)    
         else:
+            departments = Department.objects.filter().order_by('department_name')
             # List system IP Pools
             api_url = f"{settings.API_BASE_URL}/api/systemippool/"
             token = f'Token {request.user.auth_token}'
         
             context = {
                 'page_title': 'System IP Pool',
+                'departments':departments,
                 'api_url': api_url,
                 'token': token
             }

@@ -10,26 +10,35 @@
       
       <div class="modal-body">
         <div class="row">
-          
+          <div class="col-lg-12">
+            <div class="mb-3">
+              <label class="form-label">Department  *</label>
+              <select class="form-select" id="department_id" name="department"> 
+                <option value="">Select</option>
+                {% if departments %}
+                {% for department in departments %}
+                <option value="{{ department.id }}" {% if department.id == result.department.id %}selected{% endif %}>{{ department.department_name }}</option>
+                {% endfor %}
+                {% endif %}
+              </select>
+            </div>
+          </div>
           <div class="col-lg-6">
             <div>
               <label class="form-label">From IP Range *</label>
-              <input type="text" id="from_ip_range" class="form-control" value="{% if result %}{{result.from_ip_range}}{% endif %}">
+              <input type="text" id="from_ip_range" class="form-control" value="{% if result %}{{ result.from_ip_range }}{% endif %}">
             </div>
           </div>
 
           <div class="col-lg-6">
             <div>
               <label class="form-label">To IP Range *</label>
-              <input type="text" id="to_ip_range" class="form-control" value="{% if result %}{{result.to_ip_range}}{% endif %}">
+              <input type="text" id="to_ip_range" class="form-control" value="{% if result %}{{ result.to_ip_range }}{% endif %}">
             </div>
           </div>
-
-
         </div>
       </div>
       <div class="modal-footer">
-        
         <a href="javascript:saveUpdate()" class="btn btn-primary ms-auto">
              Save
         </a>
@@ -37,59 +46,61 @@
     </div>
   </div>
 </form>
-  <script>
-    document.getElementById("add_edit_form").addEventListener("submit", function(event) {
-      event.preventDefault(); // Prevent default form submission
-  
-      saveUpdate(); // Call your custom function to handle form submission
-    });
-    function saveUpdate(){
-        var from_ip_range = $('#from_ip_range').val();
-        var to_ip_range = $('#to_ip_range').val();
+<script>
+  document.getElementById("add_edit_form").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevent default form submission
 
-        var api_url = '{{ api_url }}';
-        {% if result %}
-          var method = 'PUT';
-        {% else %}
-          var method = 'POST';
-        {% endif %}
-        var token = '{{token}}';  
-        $.ajax({
-            url: api_url,
-            method: method,
-            headers: {
-                'Authorization': token
-            },
-            data: { 
-                from_ip_range: from_ip_range, 
-                to_ip_range: to_ip_range
-            },
-            success: function (data) {
-                if (data && data.message) {
-                    openToaster("success", data.message);
-                    $("#modal-report").html('');
-                    $('.modal').modal('hide');
-                    fetchData(1);
-                } else {
-                    openToaster("danger", "Unknown success response format.");
-                }
-            },
-            error: function (err) {
-                var errorMessage = "An error occurred while processing your request.";
-                if (err.responseJSON) {
-                    errorMessage = '';
-                    for (var key in err.responseJSON) {
-                        if (err.responseJSON.hasOwnProperty(key)) {
-                            errorMessage += key + ": " + err.responseJSON[key] + "<br>";
-                        }
-                    }
-                }
-                openToaster("danger", errorMessage);
-                $('.modal').modal('show');
+    saveUpdate(); // Call your custom function to handle form submission
+  });
+
+  function saveUpdate() {
+    var from_ip_range = $('#from_ip_range').val();
+    var to_ip_range = $('#to_ip_range').val();
+    var department_id = $('#department_id').val();
+
+    var api_url = '{{ api_url }}';
+    {% if result %}
+      var method = 'PUT';
+    {% else %}
+      var method = 'POST';
+    {% endif %}
+    var token = '{{ token }}';  
+    $.ajax({
+      url: api_url,
+      method: method,
+      headers: {
+        'Authorization': token
+      },
+      data: {
+        from_ip_range: from_ip_range,
+        to_ip_range: to_ip_range,
+        department: department_id
+      },
+      success: function(data) {
+        if (data && data.message) {
+          openToaster("success", data.message);
+          $("#modal-report").html('');
+          $('.modal').modal('hide');
+          fetchData(1);
+        } else {
+          openToaster("danger", "Unknown success response format.");
+        }
+      },
+      error: function(err) {
+        var errorMessage = "An error occurred while processing your request.";
+        if (err.responseJSON) {
+          errorMessage = '';
+          for (var key in err.responseJSON) {
+            if (err.responseJSON.hasOwnProperty(key)) {
+              errorMessage += key + ": " + err.responseJSON[key] + "<br>";
             }
-        }).always(function() {
-            // hideLoader();
-        }); 
-    }
-
-  </script>
+          }
+        }
+        openToaster("danger", errorMessage);
+        $('.modal').modal('show');
+      }
+    }).always(function() {
+      // hideLoader();
+    }); 
+  }
+</script>

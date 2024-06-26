@@ -4,12 +4,14 @@ from rest_framework.exceptions import APIException
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
+from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from apps.frontend.models import(
-    SystemConfiguration, SystemIPPool
+from apps.backend.models import(
+    SystemConfiguration, SystemIPPool,
+    Department
 )
 from .serializers import (
     SystemConfigurationSerializer, PaginatedSystemConfigurationSerializer,
@@ -47,8 +49,8 @@ class SystemConfigurationAPIView(ViewSet):
             serializer = SystemConfigurationSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({"message": "Record has been saved successfully"}, status=201)
-            return Response(serializer.errors, status=400)
+                return Response({"message": "Record has been saved successfully"}, status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             raise APIException({"error": str(e)})
 
@@ -73,10 +75,10 @@ class SystemConfigurationAPIView(ViewSet):
             serializer = SystemConfigurationSerializer(instance, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({"message": "Record has been updated successfully"}, status=200)
-            return Response(serializer.errors, status=400)
+                return Response({"message": "Record has been updated successfully"}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except ObjectDoesNotExist:
-            return Response({"error": f"SystemConfiguration id #{id} not found"}, status=404)
+            return Response({"error": f"SystemConfiguration id #{id} not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             raise APIException({"error": str(e)})
 
@@ -91,9 +93,9 @@ class SystemConfigurationAPIView(ViewSet):
         try:
             instance = SystemConfiguration.objects.get(id=id)
             serializer = SystemConfigurationSerializer(instance)
-            return Response(serializer.data, status=200)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
-            return Response({"error": f"SystemConfiguration id #{id} not found"}, status=404)
+            return Response({"error": f"SystemConfiguration id #{id} not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             raise APIException({"error": str(e)})
 
@@ -109,7 +111,7 @@ class SystemConfigurationAPIView(ViewSet):
             instance.delete()
             return Response({"message": "Record has been removed successfully"}, status=202)
         except ObjectDoesNotExist:
-            return Response({"error": f"SystemConfiguration id #{id} not found"}, status=404)
+            return Response({"error": f"SystemConfiguration id #{id} not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             raise APIException({"error": str(e)})
         
@@ -180,10 +182,11 @@ class SystemIpPoolAPIView(ViewSet):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['from_ip_range', 'to_ip_range'],
+            required=['from_ip_range', 'to_ip_range', 'department'],
             properties={
                 'from_ip_range': openapi.Schema(type=openapi.TYPE_STRING),
                 'to_ip_range': openapi.Schema(type=openapi.TYPE_STRING),
+                'department': openapi.Schema(type=openapi.TYPE_INTEGER),
             },
         ),
         responses={201: 'Created', 400: 'Bad Request', 401: 'Unauthorized'},
@@ -194,8 +197,8 @@ class SystemIpPoolAPIView(ViewSet):
             serializer = SystemIpPoolSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({"message": "Record has been saved successfully"}, status=201)
-            return Response(serializer.errors, status=400)
+                return Response({"message": "Record has been saved successfully"}, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             raise APIException({"error": str(e)})
 
@@ -204,10 +207,11 @@ class SystemIpPoolAPIView(ViewSet):
         operation_id='update_system_configuration',
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['from_ip_range', 'to_ip_range'],
+            required=['from_ip_range', 'to_ip_range', 'department'],
             properties={
                 'from_ip_range': openapi.Schema(type=openapi.TYPE_STRING),
                 'to_ip_range': openapi.Schema(type=openapi.TYPE_STRING),
+                'department': openapi.Schema(type=openapi.TYPE_INTEGER),
             },
         ),
         responses={200: 'Updated', 400: 'Bad Request', 401: 'Unauthorized'},
@@ -219,10 +223,10 @@ class SystemIpPoolAPIView(ViewSet):
             serializer = SystemIpPoolSerializer(instance, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({"message": "Record has been updated successfully"}, status=200)
-            return Response(serializer.errors, status=400)
+                return Response({"message": "Record has been updated successfully"}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except ObjectDoesNotExist:
-            return Response({"error": f"SystemIPPool id #{id} not found"}, status=404)
+            return Response({"error": f"SystemIPPool id #{id} not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             raise APIException({"error": str(e)})
 
@@ -237,9 +241,9 @@ class SystemIpPoolAPIView(ViewSet):
         try:
             instance = SystemIPPool.objects.get(id=id)
             serializer = SystemIpPoolSerializer(instance)
-            return Response(serializer.data, status=200)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
-            return Response({"error": f"SystemIPPool id #{id} not found"}, status=404)
+            return Response({"error": f"SystemIPPool id #{id} not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             raise APIException({"error": str(e)})
 
@@ -255,7 +259,7 @@ class SystemIpPoolAPIView(ViewSet):
             instance.delete()
             return Response({"message": "Record has been removed successfully"}, status=202)
         except ObjectDoesNotExist:
-            return Response({"error": f"SystemIPPool id #{id} not found"}, status=404)
+            return Response({"error": f"SystemIPPool id #{id} not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             raise APIException({"error": str(e)})
         

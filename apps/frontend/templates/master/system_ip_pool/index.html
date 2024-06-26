@@ -69,6 +69,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th>Department</th> 
                                     <th>From IP Range</th>
                                     <th>To IP Range</th>
                                     <th>Action</th>
@@ -148,6 +149,7 @@
                 var rowIndex = (currentPage - 1) * itemsPerPage + index + 1; // Calculate row index based on current page
                 var row = '<tr>' +
                     '<td>' + rowIndex + '.</td>' +
+                    '<td>' + item.department.department_name + '</td>' +
                     '<td>' + item.from_ip_range + '</td>' +
                     '<td>' + item.to_ip_range + '</td>' +
                     '<td><a href="javascript:void(0)" title="Edit" data-bs-placement="top" data-bs-toggle="modal" data-bs-target="#modal-report" onclick="addEdit(' + item.id + ')" >' +
